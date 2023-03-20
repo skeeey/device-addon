@@ -1,0 +1,72 @@
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.9.2
+  creationTimestamp: null
+  name: devicedatamodels.edge.open-cluster-management.io
+spec:
+  group: edge.open-cluster-management.io
+  names:
+    kind: DeviceDataModel
+    listKind: DeviceDataModelList
+    plural: devicedatamodels
+    singular: devicedatamodel
+  scope: Cluster
+  versions:
+  - name: v1alpha1
+    schema:
+      openAPIV3Schema:
+        description: DeviceDataModel specifies the device data schema.
+        properties:
+          apiVersion:
+            description: 'APIVersion defines the versioned schema of this representation
+              of an object. Servers should convert recognized schemas to the latest
+              internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+            type: string
+          kind:
+            description: 'Kind is a string value representing the REST resource this
+              object represents. Servers may infer this from the endpoint the client
+              submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: spec holds the data schema of a device.
+            properties:
+              attributes:
+                description: Attributes of a device
+                items:
+                  description: Attribute describes an individual device attribute.
+                  properties:
+                    description:
+                      description: Description of this attribute.
+                      type: string
+                    name:
+                      description: Name of this attribute.
+                      type: string
+                    type:
+                      description: Type of this attribute.
+                      enum:
+                      - int
+                      - float
+                      - double
+                      - bool
+                      - string
+                      - bytes
+                      type: string
+                    unit:
+                      description: Unit of this attribute
+                      type: string
+                  required:
+                  - name
+                  - type
+                  type: object
+                type: array
+            type: object
+        required:
+        - spec
+        type: object
+    served: true
+    storage: true

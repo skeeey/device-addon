@@ -1,12 +1,8 @@
----
-# Source: mosquitto/templates/serviceaccount.yaml
-
----
-# Source: mosquitto/templates/configmap.yaml
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: mosquitto
+  namespace: mosquitto
   labels:
     app.kubernetes.io/name: mosquitto
 spec:
@@ -27,9 +23,6 @@ spec:
           ports:
             - name: default
               containerPort: 1883
-              protocol: TCP
-            - name: websocket
-              containerPort: 9001
               protocol: TCP
           livenessProbe:
             tcpSocket:

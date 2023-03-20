@@ -10,7 +10,7 @@ import (
 
 	mqtt "github.com/eclipse/paho.mqtt.golang"
 
-	"github.com/skeeey/device-addon/pkg/pseudodevice/device"
+	"github.com/skeeey/device-addon/contrib/demo/pseudodevice/device"
 )
 
 func init() {

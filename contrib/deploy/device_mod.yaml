@@ -1,0 +1,14 @@
+apiVersion: devices.kubeedge.io/v1alpha2
+kind: DeviceModel
+metadata:
+  name: counter-model
+spec:
+  attributes:
+  - name: monitorring-interval
+    description: counter status
+    type: int
+    unit: "seconds"
+  - name: temperature
+    description: counter status
+    type: int
+    unit: "Celsius"

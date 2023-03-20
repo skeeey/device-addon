@@ -1,0 +1,20 @@
+apiVersion: devices.kubeedge.io/v1alpha2
+kind: Device
+metadata:
+  name: counter-model
+  namespace: edge1
+spec:
+  deviceModelRef:
+    name:
+  pubAttrs:
+  - name: monitorring-interval
+    int32Value: 5
+  subAttrs:
+  - temperature
+status:
+  reportedAttrs
+  - name: temperature
+    type: int32
+    int32Value: 5
+    description:
+    unit:
