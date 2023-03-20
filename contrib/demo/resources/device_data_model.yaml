@@ -1,7 +1,7 @@
-apiVersion: devices.kubeedge.io/v1alpha2
-kind: DeviceModel
+apiVersion: edge.open-cluster-management.io/v1alpha1
+kind: DeviceDataModel
 metadata:
-  name: counter-model
+  name: temperature-sensor
 spec:
   attributes:
   - name: monitorring-interval

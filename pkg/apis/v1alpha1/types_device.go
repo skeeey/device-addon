@@ -44,7 +44,7 @@ type DeviceSpec struct {
 
 	// Data will be processed by the device.
 	// +optional
-	Data []DeviceData `json:"data,omitempty"`
+	Data DeviceData `json:"data,omitempty"`
 
 	// DesiredData lists desired device attributes that will be reported from the device.
 	// +optional

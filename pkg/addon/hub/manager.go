@@ -27,7 +27,6 @@ const (
 	addonName             = "device-addon"
 )
 
-//go:embed manifests
 //go:embed manifests/templates
 var fs embed.FS
 

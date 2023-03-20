@@ -250,13 +250,7 @@ func (in *DeviceSpec) DeepCopyInto(out *DeviceSpec) {
 		*out = new(DeviceDataModelReference)
 		**out = **in
 	}
-	if in.Data != nil {
-		in, out := &in.Data, &out.Data
-		*out = make([]DeviceData, len(*in))
-		for i := range *in {
-			(*in)[i].DeepCopyInto(&(*out)[i])
-		}
-	}
+	in.Data.DeepCopyInto(&out.Data)
 	in.DesiredData.DeepCopyInto(&out.DesiredData)
 	return
 }

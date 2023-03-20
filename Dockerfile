@@ -18,8 +18,6 @@ RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -o device-addon cmd/main.g
 
 # Package the binary
 FROM registry.access.redhat.com/ubi8/ubi-minimal:latest
-ENV USER_UID=10001
 
 WORKDIR /
 COPY --from=builder /workspace/device-addon .
-USER ${USER_UID}

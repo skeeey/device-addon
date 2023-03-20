@@ -37,31 +37,29 @@ spec:
             properties:
               data:
                 description: Data will be processed by the device.
-                items:
-                  properties:
-                    attrs:
-                      description: Attrs lists the data will be published to the device.
-                      items:
-                        properties:
-                          name:
-                            description: name of a device data
-                            type: string
-                          value:
-                            description: value of a device data
-                            type: string
-                        required:
-                        - name
-                        - value
-                        type: object
-                      type: array
-                    topic:
-                      default: v1alpha1/devices/+/attrs/push
-                      description: Topic used to publish the data. - addon publish
-                        the data to the device by this topic - device subscribe this
-                        topic to get the data
-                      type: string
-                  type: object
-                type: array
+                properties:
+                  attrs:
+                    description: Attrs lists the data will be published to the device.
+                    items:
+                      properties:
+                        name:
+                          description: name of a device data
+                          type: string
+                        value:
+                          description: value of a device data
+                          type: string
+                      required:
+                      - name
+                      - value
+                      type: object
+                    type: array
+                  topic:
+                    default: v1alpha1/devices/+/attrs/push
+                    description: Topic used to publish the data. - addon publish the
+                      data to the device by this topic - device subscribe this topic
+                      to get the data
+                    type: string
+                type: object
               desiredData:
                 description: DesiredData lists desired device attributes that will
                   be reported from the device.

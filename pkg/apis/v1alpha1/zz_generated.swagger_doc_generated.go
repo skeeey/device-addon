@@ -491,15 +491,8 @@ func schema_device_addon_pkg_apis_v1alpha1_DeviceSpec(ref common.ReferenceCallba
 					"data": {
 						SchemaProps: spec.SchemaProps{
 							Description: "Data will be processed by the device.",
-							Type:        []string{"array"},
-							Items: &spec.SchemaOrArray{
-								Schema: &spec.Schema{
-									SchemaProps: spec.SchemaProps{
-										Default: map[string]interface{}{},
-										Ref:     ref("github.com/skeeey/device-addon/pkg/apis/v1alpha1.DeviceData"),
-									},
-								},
-							},
+							Default:     map[string]interface{}{},
+							Ref:         ref("github.com/skeeey/device-addon/pkg/apis/v1alpha1.DeviceData"),
 						},
 					},
 					"desiredData": {
