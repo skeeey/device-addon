@@ -50,14 +50,7 @@ func connectToMQTT(mqttURL string) (mqtt.Client, error) {
 func subscribe(client mqtt.Client, thermometer *device.Thermometer) error {
 	t := client.Subscribe("/device/temperatures/actions", 0, func(client mqtt.Client, msg mqtt.Message) {
 		fmt.Fprintln(os.Stderr, "msg from mqqt", msg.Topic(), string(msg.Payload()))
-		cmd := string(msg.Payload())
-		if cmd == "on" {
-			thermometer.TurnOn()
-		}
 
-		if cmd == "off" {
-			thermometer.TurnOff()
-		}
 	})
 	<-t.Done()
 	return t.Error()
@@ -68,27 +61,23 @@ func main() {
 	signal.Notify(done, os.Interrupt, syscall.SIGTERM)
 	defer close(done)
 
-	thermometer := device.NewThermometer()
-
-	if len(os.Args) == 1 {
-		thermometer.TurnOn()
-		thermometer.AddHandlers(showTemperature)
-		<-done
-		thermometer.TurnOff()
-		return
-	}
-
 	// tcp://127.0.0.1:1883
-	fmt.Fprintln(os.Stdout, "Connect to MQTT: ", os.Args[1])
+	fmt.Fprintln(os.Stdout, os.Args[1], "connecting to MQTT broke: ", os.Args[2])
 	client, err := connectToMQTT(os.Args[1])
 	if err != nil {
 		log.Fatal(err)
 	}
 
+	thermometer := device.NewThermometer()
 	thermometer.AddHandlers(showTemperature, publishTemperature(client))
+
+	go thermometer.Run()
+
 	if err := subscribe(client, thermometer); err != nil {
 		fmt.Fprintln(os.Stderr, "Failed to subscribe mqtt message from: ", os.Args[1])
 	}
 
 	<-done
+
+	thermometer.Stop()
 }

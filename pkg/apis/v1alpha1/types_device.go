@@ -32,23 +32,18 @@ type DeviceList struct {
 }
 
 type DeviceSpec struct {
-	// id of a device.
-	// +kubebuilder:validation:Required
-	// +required
-	ID string `json:"id"`
-
-	// DeviceDataModelRef refers to a device data model.
+	// deviceDataModelRef refers to a device data model.
 	// +kubebuilder:validation:Required
 	// +required
 	DeviceDataModelRef *DeviceDataModelReference `json:"deviceDataModelRef"`
 
-	// Data will be processed by the device.
+	// data lists the device data that will be processed by the device.
 	// +optional
-	Data DeviceData `json:"data,omitempty"`
+	Data []DeviceData `json:"data,omitempty"`
 
-	// DesiredData lists desired device attributes that will be reported from the device.
+	// desiredAttrs lists desired device attributes that will be reported from the device.
 	// +optional
-	DesiredData DesiredDeviceData `json:"desiredData,omitempty"`
+	DesiredAttrs []string `json:"desiredAttrs,omitempty"`
 }
 
 type DeviceStatus struct {
@@ -58,45 +53,19 @@ type DeviceStatus struct {
 	// +optional
 	Conditions []metav1.Condition `json:"conditions,omitempty" patchStrategy:"merge" patchMergeKey:"type"`
 
-	// ReportedAttrs contains desired device attributes that are reported from current device.
+	// reportedAttrs contains desired device attributes that are reported from the device.
 	// +optional
 	ReportedAttrs []ReportedAttr `json:"reportedAttrs,omitempty"`
 }
 
 type DeviceDataModelReference struct {
-	// Name of the DeviceDataMode referent.
+	// name of the DeviceDataMode referent.
 	// +kubebuilder:validation:Required
 	// +required
 	Name string `json:"name"`
 }
 
 type DeviceData struct {
-	// Topic used to publish the data.
-	//  - addon publish the data to the device by this topic
-	//  - device subscribe this topic to get the data
-	// +kubebuilder:default=v1alpha1/devices/+/attrs/push
-	// +optional
-	Topic string `json:"topic,omitempty"`
-
-	// Attrs lists the data will be published to the device.
-	// +optional
-	Attrs []AttrData `json:"attrs,omitempty"`
-}
-
-type DesiredDeviceData struct {
-	// Topic used to get the data.
-	//  - addon subscribe this topic to get the data from the device
-	//  - device publish the data by this topic
-	// +kubebuilder:default=v1alpha1/devices/+/attrs
-	// +optional
-	Topic string `json:"topic,omitempty"`
-
-	// Attrs lists desired device attribute names that will be reported from current device.
-	// +optional
-	Attrs []string `json:"attrs,omitempty"`
-}
-
-type AttrData struct {
 	// name of a device data
 	// +kubebuilder:validation:Required
 	// +required

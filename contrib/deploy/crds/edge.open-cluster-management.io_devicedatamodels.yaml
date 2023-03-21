@@ -36,18 +36,18 @@ spec:
             description: spec holds the data schema of a device.
             properties:
               attributes:
-                description: Attributes of a device
+                description: attributes of a device
                 items:
                   description: Attribute describes an individual device attribute.
                   properties:
                     description:
-                      description: Description of this attribute.
+                      description: description of this attribute.
                       type: string
                     name:
-                      description: Name of this attribute.
+                      description: name of this attribute.
                       type: string
                     type:
-                      description: Type of this attribute.
+                      description: type of this attribute.
                       enum:
                       - int
                       - float
@@ -57,7 +57,7 @@ spec:
                       - bytes
                       type: string
                     unit:
-                      description: Unit of this attribute
+                      description: unit of this attribute
                       type: string
                   required:
                   - name

@@ -23,7 +23,7 @@ import (
 )
 
 const (
-	installationNamespace = "default"
+	installationNamespace = "device-addon"
 	addonName             = "device-addon"
 )
 
@@ -115,15 +115,85 @@ func addonRBAC(kubeConfig *rest.Config) agent.PermissionConfigFunc {
 
 		groups := agent.DefaultGroups(cluster.Name, addon.Name)
 
+		clusterRole := &rbacv1.ClusterRole{
+			ObjectMeta: metav1.ObjectMeta{
+				Name: fmt.Sprintf("open-cluster-management:%s:agent", addon.Name),
+			},
+			Rules: []rbacv1.PolicyRule{
+				{
+					Verbs:     []string{"get", "list", "watch"},
+					Resources: []string{"devicedatamodels"},
+					APIGroups: []string{"edge.open-cluster-management.io"},
+				},
+			},
+		}
+		_, err = kubeclient.RbacV1().ClusterRoles().Get(context.TODO(), clusterRole.Name, metav1.GetOptions{})
+		switch {
+		case errors.IsNotFound(err):
+			_, createErr := kubeclient.RbacV1().ClusterRoles().Create(context.TODO(), clusterRole, metav1.CreateOptions{})
+			if createErr != nil {
+				return createErr
+			}
+		case err != nil:
+			return err
+		}
+
 		role := &rbacv1.Role{
 			ObjectMeta: metav1.ObjectMeta{
 				Name:      fmt.Sprintf("open-cluster-management:%s:agent", addon.Name),
 				Namespace: cluster.Name,
 			},
 			Rules: []rbacv1.PolicyRule{
-				{Verbs: []string{"get", "list", "watch"}, Resources: []string{"configmaps"}, APIGroups: []string{""}},
-				{Verbs: []string{"get", "list", "watch"}, Resources: []string{"managedclusteraddons"}, APIGroups: []string{"addon.open-cluster-management.io"}},
+				{
+					Verbs:     []string{"get", "list", "watch"},
+					Resources: []string{"configmaps"},
+					APIGroups: []string{""},
+				},
+				{
+					Verbs:     []string{"get", "list", "watch"},
+					Resources: []string{"managedclusteraddons"},
+					APIGroups: []string{"addon.open-cluster-management.io"},
+				},
+				{
+					Verbs:     []string{"get", "list", "watch", "create", "update", "patch", "delete"},
+					Resources: []string{"devices"},
+					APIGroups: []string{"edge.open-cluster-management.io"},
+				},
 			},
+		}
+		_, err = kubeclient.RbacV1().Roles(cluster.Name).Get(context.TODO(), role.Name, metav1.GetOptions{})
+		switch {
+		case errors.IsNotFound(err):
+			_, createErr := kubeclient.RbacV1().Roles(cluster.Name).Create(context.TODO(), role, metav1.CreateOptions{})
+			if createErr != nil {
+				return createErr
+			}
+		case err != nil:
+			return err
+		}
+
+		clusterRoleBinding := &rbacv1.ClusterRoleBinding{
+			ObjectMeta: metav1.ObjectMeta{
+				Name: fmt.Sprintf("open-cluster-management:%s:agent", addon.Name),
+			},
+			RoleRef: rbacv1.RoleRef{
+				APIGroup: "rbac.authorization.k8s.io",
+				Kind:     "ClusterRole",
+				Name:     fmt.Sprintf("open-cluster-management:%s:agent", addon.Name),
+			},
+			Subjects: []rbacv1.Subject{
+				{Kind: "Group", APIGroup: "rbac.authorization.k8s.io", Name: groups[0]},
+			},
+		}
+		_, err = kubeclient.RbacV1().ClusterRoleBindings().Get(context.TODO(), clusterRoleBinding.Name, metav1.GetOptions{})
+		switch {
+		case errors.IsNotFound(err):
+			_, createErr := kubeclient.RbacV1().ClusterRoleBindings().Create(context.TODO(), clusterRoleBinding, metav1.CreateOptions{})
+			if createErr != nil {
+				return createErr
+			}
+		case err != nil:
+			return err
 		}
 
 		binding := &rbacv1.RoleBinding{
@@ -139,17 +209,6 @@ func addonRBAC(kubeConfig *rest.Config) agent.PermissionConfigFunc {
 			Subjects: []rbacv1.Subject{
 				{Kind: "Group", APIGroup: "rbac.authorization.k8s.io", Name: groups[0]},
 			},
-		}
-
-		_, err = kubeclient.RbacV1().Roles(cluster.Name).Get(context.TODO(), role.Name, metav1.GetOptions{})
-		switch {
-		case errors.IsNotFound(err):
-			_, createErr := kubeclient.RbacV1().Roles(cluster.Name).Create(context.TODO(), role, metav1.CreateOptions{})
-			if createErr != nil {
-				return createErr
-			}
-		case err != nil:
-			return err
 		}
 
 		_, err = kubeclient.RbacV1().RoleBindings(cluster.Name).Get(context.TODO(), binding.Name, metav1.GetOptions{})

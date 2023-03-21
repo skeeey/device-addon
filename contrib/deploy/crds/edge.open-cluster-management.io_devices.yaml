@@ -36,62 +36,38 @@ spec:
             description: spec holds the information about a device.
             properties:
               data:
-                description: Data will be processed by the device.
-                properties:
-                  attrs:
-                    description: Attrs lists the data will be published to the device.
-                    items:
-                      properties:
-                        name:
-                          description: name of a device data
-                          type: string
-                        value:
-                          description: value of a device data
-                          type: string
-                      required:
-                      - name
-                      - value
-                      type: object
-                    type: array
-                  topic:
-                    default: v1alpha1/devices/+/attrs/push
-                    description: Topic used to publish the data. - addon publish the
-                      data to the device by this topic - device subscribe this topic
-                      to get the data
-                    type: string
-                type: object
-              desiredData:
-                description: DesiredData lists desired device attributes that will
-                  be reported from the device.
-                properties:
-                  attrs:
-                    description: Attrs lists desired device attribute names that will
-                      be reported from current device.
-                    items:
+                description: data lists the device data that will be processed by
+                  the device.
+                items:
+                  properties:
+                    name:
+                      description: name of a device data
                       type: string
-                    type: array
-                  topic:
-                    default: v1alpha1/devices/+/attrs
-                    description: Topic used to get the data. - addon subscribe this
-                      topic to get the data from the device - device publish the data
-                      by this topic
-                    type: string
-                type: object
+                    value:
+                      description: value of a device data
+                      type: string
+                  required:
+                  - name
+                  - value
+                  type: object
+                type: array
+              desiredAttrs:
+                description: desiredAttrs lists desired device attributes that will
+                  be reported from the device.
+                items:
+                  type: string
+                type: array
               deviceDataModelRef:
-                description: DeviceDataModelRef refers to a device data model.
+                description: deviceDataModelRef refers to a device data model.
                 properties:
                   name:
-                    description: Name of the DeviceDataMode referent.
+                    description: name of the DeviceDataMode referent.
                     type: string
                 required:
                 - name
                 type: object
-              id:
-                description: id of a device.
-                type: string
             required:
             - deviceDataModelRef
-            - id
             type: object
           status:
             description: status holds the state of a device.
@@ -166,38 +142,25 @@ spec:
                   type: object
                 type: array
               reportedAttrs:
-                description: ReportedAttrs contains desired device attributes that
-                  are reported from current device.
+                description: reportedAttrs contains desired device attributes that
+                  are reported from the device.
                 items:
                   properties:
-                    attrs:
-                      description: Attrs lists the data will be published to the device.
-                      items:
-                        properties:
-                          name:
-                            description: name of a device data
-                            type: string
-                          value:
-                            description: value of a device data
-                            type: string
-                        required:
-                        - name
-                        - value
-                        type: object
-                      type: array
                     lastUpdatedTime:
                       description: lastUpdatedTime is the last updated time for this
                         attribute.
                       format: date-time
                       type: string
-                    topic:
-                      default: v1alpha1/devices/+/attrs/push
-                      description: Topic used to publish the data. - addon publish
-                        the data to the device by this topic - device subscribe this
-                        topic to get the data
+                    name:
+                      description: name of a device data
+                      type: string
+                    value:
+                      description: value of a device data
                       type: string
                   required:
                   - lastUpdatedTime
+                  - name
+                  - value
                   type: object
                 type: array
             type: object

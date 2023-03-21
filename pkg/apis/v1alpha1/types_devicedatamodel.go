@@ -27,7 +27,7 @@ type DeviceDataModelList struct {
 }
 
 type DeviceDataModelSpec struct {
-	// Attributes of a device
+	// attributes of a device
 	// +optional
 	Attributes []Attribute `json:"attributes,omitempty"`
 }
@@ -47,21 +47,21 @@ const (
 
 // Attribute describes an individual device attribute.
 type Attribute struct {
-	// Name of this attribute.
+	// name of this attribute.
 	// +kubebuilder:validation:Required
 	// +required
 	Name string `json:"name"`
 
-	// Description of this attribute.
+	// description of this attribute.
 	// +optional
 	Description string `json:"description,omitempty"`
 
-	// Type of this attribute.
+	// type of this attribute.
 	// +kubebuilder:validation:Required
 	// +required
 	Type AttributeType `json:"type"`
 
-	// Unit of this attribute
+	// unit of this attribute
 	// +optional
 	Unit string `json:"unit,omitempty"`
 }

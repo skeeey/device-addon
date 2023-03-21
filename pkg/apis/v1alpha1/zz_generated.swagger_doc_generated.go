@@ -16,9 +16,7 @@ import (
 
 func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenAPIDefinition {
 	return map[string]common.OpenAPIDefinition{
-		"github.com/skeeey/device-addon/pkg/apis/v1alpha1.AttrData":                 schema_device_addon_pkg_apis_v1alpha1_AttrData(ref),
 		"github.com/skeeey/device-addon/pkg/apis/v1alpha1.Attribute":                schema_device_addon_pkg_apis_v1alpha1_Attribute(ref),
-		"github.com/skeeey/device-addon/pkg/apis/v1alpha1.DesiredDeviceData":        schema_device_addon_pkg_apis_v1alpha1_DesiredDeviceData(ref),
 		"github.com/skeeey/device-addon/pkg/apis/v1alpha1.Device":                   schema_device_addon_pkg_apis_v1alpha1_Device(ref),
 		"github.com/skeeey/device-addon/pkg/apis/v1alpha1.DeviceData":               schema_device_addon_pkg_apis_v1alpha1_DeviceData(ref),
 		"github.com/skeeey/device-addon/pkg/apis/v1alpha1.DeviceDataModel":          schema_device_addon_pkg_apis_v1alpha1_DeviceDataModel(ref),
@@ -86,35 +84,6 @@ func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenA
 	}
 }
 
-func schema_device_addon_pkg_apis_v1alpha1_AttrData(ref common.ReferenceCallback) common.OpenAPIDefinition {
-	return common.OpenAPIDefinition{
-		Schema: spec.Schema{
-			SchemaProps: spec.SchemaProps{
-				Type: []string{"object"},
-				Properties: map[string]spec.Schema{
-					"name": {
-						SchemaProps: spec.SchemaProps{
-							Description: "name of a device data",
-							Default:     "",
-							Type:        []string{"string"},
-							Format:      "",
-						},
-					},
-					"value": {
-						SchemaProps: spec.SchemaProps{
-							Description: "value of a device data",
-							Default:     "",
-							Type:        []string{"string"},
-							Format:      "",
-						},
-					},
-				},
-				Required: []string{"name", "value"},
-			},
-		},
-	}
-}
-
 func schema_device_addon_pkg_apis_v1alpha1_Attribute(ref common.ReferenceCallback) common.OpenAPIDefinition {
 	return common.OpenAPIDefinition{
 		Schema: spec.Schema{
@@ -124,7 +93,7 @@ func schema_device_addon_pkg_apis_v1alpha1_Attribute(ref common.ReferenceCallbac
 				Properties: map[string]spec.Schema{
 					"name": {
 						SchemaProps: spec.SchemaProps{
-							Description: "Name of this attribute.",
+							Description: "name of this attribute.",
 							Default:     "",
 							Type:        []string{"string"},
 							Format:      "",
@@ -132,14 +101,14 @@ func schema_device_addon_pkg_apis_v1alpha1_Attribute(ref common.ReferenceCallbac
 					},
 					"description": {
 						SchemaProps: spec.SchemaProps{
-							Description: "Description of this attribute.",
+							Description: "description of this attribute.",
 							Type:        []string{"string"},
 							Format:      "",
 						},
 					},
 					"type": {
 						SchemaProps: spec.SchemaProps{
-							Description: "Type of this attribute.",
+							Description: "type of this attribute.",
 							Default:     "",
 							Type:        []string{"string"},
 							Format:      "",
@@ -147,47 +116,13 @@ func schema_device_addon_pkg_apis_v1alpha1_Attribute(ref common.ReferenceCallbac
 					},
 					"unit": {
 						SchemaProps: spec.SchemaProps{
-							Description: "Unit of this attribute",
+							Description: "unit of this attribute",
 							Type:        []string{"string"},
 							Format:      "",
 						},
 					},
 				},
 				Required: []string{"name", "type"},
-			},
-		},
-	}
-}
-
-func schema_device_addon_pkg_apis_v1alpha1_DesiredDeviceData(ref common.ReferenceCallback) common.OpenAPIDefinition {
-	return common.OpenAPIDefinition{
-		Schema: spec.Schema{
-			SchemaProps: spec.SchemaProps{
-				Type: []string{"object"},
-				Properties: map[string]spec.Schema{
-					"topic": {
-						SchemaProps: spec.SchemaProps{
-							Description: "Topic used to get the data.\n - addon subscribe this topic to get the data from the device\n - device publish the data by this topic",
-							Type:        []string{"string"},
-							Format:      "",
-						},
-					},
-					"attrs": {
-						SchemaProps: spec.SchemaProps{
-							Description: "Attrs lists desired device attribute names that will be reported from current device.",
-							Type:        []string{"array"},
-							Items: &spec.SchemaOrArray{
-								Schema: &spec.Schema{
-									SchemaProps: spec.SchemaProps{
-										Default: "",
-										Type:    []string{"string"},
-										Format:  "",
-									},
-								},
-							},
-						},
-					},
-				},
 			},
 		},
 	}
@@ -249,32 +184,26 @@ func schema_device_addon_pkg_apis_v1alpha1_DeviceData(ref common.ReferenceCallba
 			SchemaProps: spec.SchemaProps{
 				Type: []string{"object"},
 				Properties: map[string]spec.Schema{
-					"topic": {
+					"name": {
 						SchemaProps: spec.SchemaProps{
-							Description: "Topic used to publish the data.\n - addon publish the data to the device by this topic\n - device subscribe this topic to get the data",
+							Description: "name of a device data",
+							Default:     "",
 							Type:        []string{"string"},
 							Format:      "",
 						},
 					},
-					"attrs": {
+					"value": {
 						SchemaProps: spec.SchemaProps{
-							Description: "Attrs lists the data will be published to the device.",
-							Type:        []string{"array"},
-							Items: &spec.SchemaOrArray{
-								Schema: &spec.Schema{
-									SchemaProps: spec.SchemaProps{
-										Default: map[string]interface{}{},
-										Ref:     ref("github.com/skeeey/device-addon/pkg/apis/v1alpha1.AttrData"),
-									},
-								},
-							},
+							Description: "value of a device data",
+							Default:     "",
+							Type:        []string{"string"},
+							Format:      "",
 						},
 					},
 				},
+				Required: []string{"name", "value"},
 			},
 		},
-		Dependencies: []string{
-			"github.com/skeeey/device-addon/pkg/apis/v1alpha1.AttrData"},
 	}
 }
 
@@ -378,7 +307,7 @@ func schema_device_addon_pkg_apis_v1alpha1_DeviceDataModelReference(ref common.R
 				Properties: map[string]spec.Schema{
 					"name": {
 						SchemaProps: spec.SchemaProps{
-							Description: "Name of the DeviceDataMode referent.",
+							Description: "name of the DeviceDataMode referent.",
 							Default:     "",
 							Type:        []string{"string"},
 							Format:      "",
@@ -399,7 +328,7 @@ func schema_device_addon_pkg_apis_v1alpha1_DeviceDataModelSpec(ref common.Refere
 				Properties: map[string]spec.Schema{
 					"attributes": {
 						SchemaProps: spec.SchemaProps{
-							Description: "Attributes of a device",
+							Description: "attributes of a device",
 							Type:        []string{"array"},
 							Items: &spec.SchemaOrArray{
 								Schema: &spec.Schema{
@@ -474,40 +403,47 @@ func schema_device_addon_pkg_apis_v1alpha1_DeviceSpec(ref common.ReferenceCallba
 			SchemaProps: spec.SchemaProps{
 				Type: []string{"object"},
 				Properties: map[string]spec.Schema{
-					"id": {
-						SchemaProps: spec.SchemaProps{
-							Description: "id of a device.",
-							Default:     "",
-							Type:        []string{"string"},
-							Format:      "",
-						},
-					},
 					"deviceDataModelRef": {
 						SchemaProps: spec.SchemaProps{
-							Description: "DeviceDataModelRef refers to a device data model.",
+							Description: "deviceDataModelRef refers to a device data model.",
 							Ref:         ref("github.com/skeeey/device-addon/pkg/apis/v1alpha1.DeviceDataModelReference"),
 						},
 					},
 					"data": {
 						SchemaProps: spec.SchemaProps{
-							Description: "Data will be processed by the device.",
-							Default:     map[string]interface{}{},
-							Ref:         ref("github.com/skeeey/device-addon/pkg/apis/v1alpha1.DeviceData"),
+							Description: "data lists the device data that will be processed by the device.",
+							Type:        []string{"array"},
+							Items: &spec.SchemaOrArray{
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Default: map[string]interface{}{},
+										Ref:     ref("github.com/skeeey/device-addon/pkg/apis/v1alpha1.DeviceData"),
+									},
+								},
+							},
 						},
 					},
-					"desiredData": {
+					"desiredAttrs": {
 						SchemaProps: spec.SchemaProps{
-							Description: "DesiredData lists desired device attributes that will be reported from the device.",
-							Default:     map[string]interface{}{},
-							Ref:         ref("github.com/skeeey/device-addon/pkg/apis/v1alpha1.DesiredDeviceData"),
+							Description: "desiredAttrs lists desired device attributes that will be reported from the device.",
+							Type:        []string{"array"},
+							Items: &spec.SchemaOrArray{
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Default: "",
+										Type:    []string{"string"},
+										Format:  "",
+									},
+								},
+							},
 						},
 					},
 				},
-				Required: []string{"id", "deviceDataModelRef"},
+				Required: []string{"deviceDataModelRef"},
 			},
 		},
 		Dependencies: []string{
-			"github.com/skeeey/device-addon/pkg/apis/v1alpha1.DesiredDeviceData", "github.com/skeeey/device-addon/pkg/apis/v1alpha1.DeviceData", "github.com/skeeey/device-addon/pkg/apis/v1alpha1.DeviceDataModelReference"},
+			"github.com/skeeey/device-addon/pkg/apis/v1alpha1.DeviceData", "github.com/skeeey/device-addon/pkg/apis/v1alpha1.DeviceDataModelReference"},
 	}
 }
 
@@ -539,7 +475,7 @@ func schema_device_addon_pkg_apis_v1alpha1_DeviceStatus(ref common.ReferenceCall
 					},
 					"reportedAttrs": {
 						SchemaProps: spec.SchemaProps{
-							Description: "ReportedAttrs contains desired device attributes that are reported from current device.",
+							Description: "reportedAttrs contains desired device attributes that are reported from the device.",
 							Type:        []string{"array"},
 							Items: &spec.SchemaOrArray{
 								Schema: &spec.Schema{
@@ -572,33 +508,28 @@ func schema_device_addon_pkg_apis_v1alpha1_ReportedAttr(ref common.ReferenceCall
 							Ref:         ref("k8s.io/apimachinery/pkg/apis/meta/v1.Time"),
 						},
 					},
-					"topic": {
+					"name": {
 						SchemaProps: spec.SchemaProps{
-							Description: "Topic used to publish the data.\n - addon publish the data to the device by this topic\n - device subscribe this topic to get the data",
+							Description: "name of a device data",
+							Default:     "",
 							Type:        []string{"string"},
 							Format:      "",
 						},
 					},
-					"attrs": {
+					"value": {
 						SchemaProps: spec.SchemaProps{
-							Description: "Attrs lists the data will be published to the device.",
-							Type:        []string{"array"},
-							Items: &spec.SchemaOrArray{
-								Schema: &spec.Schema{
-									SchemaProps: spec.SchemaProps{
-										Default: map[string]interface{}{},
-										Ref:     ref("github.com/skeeey/device-addon/pkg/apis/v1alpha1.AttrData"),
-									},
-								},
-							},
+							Description: "value of a device data",
+							Default:     "",
+							Type:        []string{"string"},
+							Format:      "",
 						},
 					},
 				},
-				Required: []string{"lastUpdatedTime"},
+				Required: []string{"lastUpdatedTime", "name", "value"},
 			},
 		},
 		Dependencies: []string{
-			"github.com/skeeey/device-addon/pkg/apis/v1alpha1.AttrData", "k8s.io/apimachinery/pkg/apis/meta/v1.Time"},
+			"k8s.io/apimachinery/pkg/apis/meta/v1.Time"},
 	}
 }
 

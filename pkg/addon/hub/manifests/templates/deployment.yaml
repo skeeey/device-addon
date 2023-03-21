@@ -22,7 +22,10 @@ spec:
           - "/device-addon"
           - "agent"
           - --cluster-name={{ .ClusterName }}
-          - --kubeconfig=/etc/hub/kubeconfig
+          - --hub-kubeconfig=/etc/hub/kubeconfig
+          - --mqtt-broker-addr=tcp://mosquitto.mosquitto.svc:1883
+          - --mqtt-publish-topic=v1alpha1/devices/attrs/push
+          - --mqtt-subscribe-topic=v1alpha1/devices/attrs
           volumeMounts:
             - name: hub-kubeconfig
               mountPath: /etc/hub/

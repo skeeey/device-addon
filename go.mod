@@ -4,6 +4,7 @@ go 1.19
 
 require (
 	github.com/eclipse/paho.mqtt.golang v1.4.2
+	github.com/evanphx/json-patch v4.12.0+incompatible
 	github.com/spf13/cobra v1.6.0
 	github.com/spf13/pflag v1.0.5
 	k8s.io/api v0.26.1
@@ -32,7 +33,6 @@ require (
 	github.com/cyphar/filepath-securejoin v0.2.3 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/emicklei/go-restful/v3 v3.9.0 // indirect
-	github.com/evanphx/json-patch v4.12.0+incompatible // indirect
 	github.com/fatih/structs v1.1.0 // indirect
 	github.com/felixge/httpsnoop v1.0.3 // indirect
 	github.com/fsnotify/fsnotify v1.6.0 // indirect
