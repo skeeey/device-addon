@@ -265,7 +265,6 @@ func (in *DeviceStatus) DeepCopy() *DeviceStatus {
 func (in *ReportedAttr) DeepCopyInto(out *ReportedAttr) {
 	*out = *in
 	in.LastUpdatedTime.DeepCopyInto(&out.LastUpdatedTime)
-	out.DeviceData = in.DeviceData
 	return
 }
 

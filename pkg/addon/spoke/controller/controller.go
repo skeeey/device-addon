@@ -118,7 +118,7 @@ func (c *deviceController) publishData(ctx context.Context, device *edgev1alpha1
 		return nil
 	}
 
-	dataMap := map[string]any{}
+	dataMap := map[string]string{}
 	for _, attr := range data {
 		// TODO convert the value with data model type
 		dataMap[attr.Name] = attr.Value
@@ -144,7 +144,7 @@ func (c *deviceController) publishData(ctx context.Context, device *edgev1alpha1
 		publishedCondition := metav1.Condition{
 			Type:    "DataPublished",
 			Status:  metav1.ConditionTrue,
-			Reason:  "Device data is published",
+			Reason:  "DataPublished",
 			Message: fmt.Sprintf("Device data %q is published", string(jsonData)),
 		}
 
@@ -152,18 +152,23 @@ func (c *deviceController) publishData(ctx context.Context, device *edgev1alpha1
 		if t.Error() != nil {
 			fmt.Fprintln(os.Stderr, "Failed to publish message to mqtt, ", t.Error())
 			publishedCondition.Status = metav1.ConditionFalse
-			publishedCondition.Reason = "Failed to publish device data"
+			publishedCondition.Reason = "DataPublishFailed"
 			publishedCondition.Message = fmt.Sprintf("Failed to publish device data %q, %v", string(jsonData), t.Error())
 		}
 
-		if _, _, err := utils.UpdateDeviceStatus(
+		_, updated, err := utils.UpdateDeviceStatus(
 			ctx,
 			c.deviceClient,
 			device.Namespace,
 			device.Name,
 			utils.UpdateDeviceConditionFn(publishedCondition),
-		); err != nil {
+		)
+		if err != nil {
 			klog.Errorf("failed to update device %s/%s status, %v", device.Namespace, device.Name, err)
+		}
+
+		if updated && t.Error() != nil {
+			c.devices[device.Name] = jsonData
 		}
 	}()
 

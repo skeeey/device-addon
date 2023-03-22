@@ -159,6 +159,11 @@ func addonRBAC(kubeConfig *rest.Config) agent.PermissionConfigFunc {
 					Resources: []string{"devices"},
 					APIGroups: []string{"edge.open-cluster-management.io"},
 				},
+				{
+					Verbs:     []string{"update", "patch"},
+					Resources: []string{"devices/status"},
+					APIGroups: []string{"edge.open-cluster-management.io"},
+				},
 			},
 		}
 		_, err = kubeclient.RbacV1().Roles(cluster.Name).Get(context.TODO(), role.Name, metav1.GetOptions{})

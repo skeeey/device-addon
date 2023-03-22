@@ -152,10 +152,10 @@ spec:
                       format: date-time
                       type: string
                     name:
-                      description: name of a device data
+                      description: name of a device attribue
                       type: string
                     value:
-                      description: value of a device data
+                      description: value of a device attribue
                       type: string
                   required:
                   - lastUpdatedTime

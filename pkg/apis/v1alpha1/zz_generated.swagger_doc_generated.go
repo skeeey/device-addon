@@ -510,7 +510,7 @@ func schema_device_addon_pkg_apis_v1alpha1_ReportedAttr(ref common.ReferenceCall
 					},
 					"name": {
 						SchemaProps: spec.SchemaProps{
-							Description: "name of a device data",
+							Description: "name of a device attribue",
 							Default:     "",
 							Type:        []string{"string"},
 							Format:      "",
@@ -518,14 +518,14 @@ func schema_device_addon_pkg_apis_v1alpha1_ReportedAttr(ref common.ReferenceCall
 					},
 					"value": {
 						SchemaProps: spec.SchemaProps{
-							Description: "value of a device data",
+							Description: "value of a device attribue",
 							Default:     "",
 							Type:        []string{"string"},
 							Format:      "",
 						},
 					},
 				},
-				Required: []string{"lastUpdatedTime", "name", "value"},
+				Required: []string{"lastUpdatedTime", "name"},
 			},
 		},
 		Dependencies: []string{

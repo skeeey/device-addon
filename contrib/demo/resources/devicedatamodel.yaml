@@ -1,14 +1,14 @@
 apiVersion: edge.open-cluster-management.io/v1alpha1
 kind: DeviceDataModel
 metadata:
-  name: temperature-sensor
+  name: thermometer
 spec:
   attributes:
   - name: monitorring-interval
-    description: counter status
+    description: monitorring interval
     type: int
     unit: "seconds"
   - name: temperature
-    description: counter status
+    description: current temperature
     type: int
     unit: "Celsius"

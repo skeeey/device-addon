@@ -85,5 +85,13 @@ type ReportedAttr struct {
 	// +required
 	LastUpdatedTime metav1.Time `json:"lastUpdatedTime"`
 
-	DeviceData DeviceData `json:",inline"`
+	// name of a device attribue
+	// +kubebuilder:validation:Required
+	// +required
+	Name string `json:"name"`
+
+	// value of a device attribue
+	// +kubebuilder:validation:Required
+	// +optional
+	Value string `json:"value"`
 }

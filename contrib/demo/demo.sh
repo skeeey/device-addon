@@ -2,19 +2,23 @@
 
 REPO_DIR="$(cd "$(dirname ${BASH_SOURCE[0]})/../.." ; pwd -P)"
 
-cluster=cluster1
+demo_dir=${REPO_DIR}/contrib/demo
+cluster=edge-node
 
-kubectl apply -f ${REPO_DIR}/contrib/demo/resources/device_data_model.yaml
+source ${demo_dir}/demo_magic
 
-kubectl get clustermanagementaddons
-kubectl get devicedatamodels
+# comment "managed cluster and device addon"
+pe "kubectl get managedclusters"
+pe "kubectl get clustermanagementaddons"
+pe "kubectl -n ${cluster} get managedclusteraddons"
 
-kubectl apply -f ${REPO_DIR}/contrib/demo/resources/device_data_model.yaml
+comment "device data model"
+pe "kubectl apply -f ${demo_dir}/resources/devicedatamodel.yaml"
+pe "kubectl get devicedatamodels thermometer"
 
-kubectl -n ${cluster} get managedclusteraddons
+comment "create devices"
+pe "cat ${demo_dir}/resources/device-a.yaml"
+pe "kubectl apply -n ${cluster} -f ${demo_dir}/resources/device-a.yaml"
 
-kubectl -n ${cluster} apply -f ${REPO_DIR}/contrib/demo/resources/device.yaml
-
-
-kubectl -n mosquitto get svc mosquitto -ojsonpath='{.spec.ports[0].nodePort}'
-kubectl get node edge-control-plane -ojsonpath='{.status.addresses[0].address}'
+pe "cat ${demo_dir}/resources/device-b.yaml"
+pe "kubectl apply -n ${cluster} -f ${demo_dir}/resources/device-b.yaml"

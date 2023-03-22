@@ -43,7 +43,7 @@ func NewSubscriber(
 }
 
 func (s *Subscriber) Run(ctx context.Context) {
-	t := s.mqttClient.Subscribe(s.subTopic, 0, func(client mqtt.Client, msg mqtt.Message) {
+	t := s.mqttClient.Subscribe(s.subTopic+"/+", 0, func(client mqtt.Client, msg mqtt.Message) {
 		topic := msg.Topic()
 		payload := msg.Payload()
 		klog.Infof("msg from MQQT topic=%s payload=%s", topic, string(payload))
@@ -86,7 +86,7 @@ func (s *Subscriber) updateDevice(ctx context.Context, clusterName, name string,
 		func(oldStatus *edgev1alpha1.DeviceStatus) error {
 			oldAttrs := map[string]string{}
 			for _, attr := range oldStatus.ReportedAttrs {
-				oldAttrs[attr.DeviceData.Name] = attr.DeviceData.Value
+				oldAttrs[attr.Name] = attr.Value
 			}
 
 			if equality.Semantic.DeepEqual(oldAttrs, newAttrs) {
@@ -96,13 +96,12 @@ func (s *Subscriber) updateDevice(ctx context.Context, clusterName, name string,
 			reportedAttrs := []edgev1alpha1.ReportedAttr{}
 
 			//TODO only update existed attr
+			klog.Infof("new attrs: %+v", newAttrs)
 			for k, v := range newAttrs {
 				reportedAttrs = append(reportedAttrs, edgev1alpha1.ReportedAttr{
 					LastUpdatedTime: metav1.Now(),
-					DeviceData: edgev1alpha1.DeviceData{
-						Name:  k,
-						Value: v,
-					},
+					Name:            k,
+					Value:           v,
 				})
 			}
 

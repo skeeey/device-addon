@@ -1,0 +1,12 @@
+apiVersion: edge.open-cluster-management.io/v1alpha1
+kind: Device
+metadata:
+  name: room-a
+spec:
+  deviceDataModelRef:
+    name: thermometer
+  data:
+  - name: monitorring-interval
+    value: "15"
+  desiredAttrs:
+  - temperature
