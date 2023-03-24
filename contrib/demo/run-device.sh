@@ -2,9 +2,9 @@
 
 REPO_DIR="$(cd "$(dirname ${BASH_SOURCE[0]})/../.." ; pwd -P)"
 
-KUBECONTEXT=${KUBECONTEXT:-"kind-edge-demo"}
+spoke="edge-node"
 
-port=$(kubectl --context ${KUBECONTEXT} -n mosquitto get svc mosquitto -ojsonpath='{.spec.ports[0].nodePort}')
-addr=$(kubectl --context ${KUBECONTEXT} get node edge-demo-control-plane -ojsonpath='{.status.addresses[0].address}')
+port=$(kubectl --context kind-${spoke} -n mosquitto get svc mosquitto -ojsonpath='{.spec.ports[0].nodePort}')
+addr=$(kubectl --context kind-${spoke} get node ${spoke}-control-plane -ojsonpath='{.status.addresses[0].address}')
 
 ${REPO_DIR}/bin/thermometer "$1" "tcp://$addr:$port"

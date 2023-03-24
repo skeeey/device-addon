@@ -37,7 +37,11 @@ image:
 image-push: image
 	docker push ${IMG}
 
-## run demo
+## deploy and run demo
+.PHONY: deploy
+deploy:
+	contrib/demo/deploy.sh
+
 .PHONY: run-thermometer-a
 run-thermometer-a:
 	contrib/demo/run-device.sh room-a

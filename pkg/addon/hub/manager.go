@@ -23,7 +23,7 @@ import (
 )
 
 const (
-	installationNamespace = "device-addon"
+	installationNamespace = "multicluster-controlplane-agent"
 	addonName             = "device-addon"
 )
 
