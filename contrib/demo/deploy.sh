@@ -44,7 +44,7 @@ kubectl --context kind-${spoke} delete namespace ${agent_namespace} --ignore-not
 kubectl --context kind-${spoke} create namespace ${agent_namespace}
 kubectl --context kind-${spoke} -n ${agent_namespace} apply -k ${agent_deploy_path}
 
-sleep 30
+sleep 60
 
 kubectl --context kind-${hub} patch managedcluster edge-node -p='{"spec":{"hubAcceptsClient":true}}' --type=merge
 kubectl --context kind-${hub} get csr -l open-cluster-management.io/cluster-name=edge-node | grep Pending | awk '{print $1}' | xargs kubectl certificate approve
