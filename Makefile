@@ -19,7 +19,7 @@ code-gen: code-generator
 .PHONY: update
 update: code-gen crds-gen
 
-## build binary
+## build
 .PHONY: build
 build:
 	go build -o bin/device-addon cmd/main.go
@@ -28,7 +28,6 @@ build:
 build-thermometer:
 	go build -o bin/thermometer contrib/demo/device/thermometer.go
 
-## build and push image
 .PHONY: image
 image:
 	docker build -t ${IMG} .

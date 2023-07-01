@@ -1,0 +1,9 @@
+drivers:
+ "opcua":
+    configDir: "/Users/liuwei/go/src/github.com/skeeey/device-addon/contrib/config/opcua"
+messageBuses:
+  "mqtt":
+    enabled: true
+    properties:
+      publishTopic: "/ocm/devices/%s/data/%s" # /ocm/devices/<device name>/data/<data name>
+      payloadFormat: "jsonMap" # jsonObj or jsonMap

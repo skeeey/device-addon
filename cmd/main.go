@@ -3,12 +3,7 @@ package main
 import (
 	goflag "flag"
 	"fmt"
-	"math/rand"
 	"os"
-	"time"
-
-	"github.com/skeeey/device-addon/pkg/cmd/addon"
-	"github.com/skeeey/device-addon/pkg/cmd/agent"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
@@ -16,11 +11,12 @@ import (
 	utilflag "k8s.io/component-base/cli/flag"
 	logs "k8s.io/component-base/logs/api/v1"
 	"k8s.io/component-base/version"
+
+	"github.com/skeeey/device-addon/pkg/cmd/addon"
+	"github.com/skeeey/device-addon/pkg/cmd/agent"
 )
 
 func main() {
-	rand.Seed(time.Now().UTC().UnixNano())
-
 	pflag.CommandLine.SetNormalizeFunc(utilflag.WordSepNormalizeFunc)
 	pflag.CommandLine.AddGoFlagSet(goflag.CommandLine)
 
@@ -44,7 +40,8 @@ func main() {
 	}
 
 	cmd.AddCommand(addon.NewManagerCommand())
-	cmd.AddCommand(agent.NewAgentCommand())
+	cmd.AddCommand(agent.NewAddOnAgentCommand())
+	cmd.AddCommand(agent.NewDriverAgentCommand())
 
 	if err := cmd.Execute(); err != nil {
 		fmt.Fprintf(os.Stderr, "%v\n", err)

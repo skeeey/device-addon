@@ -1,0 +1,3 @@
+devices:
+- name: "mqtt-test-device"
+  description: "MQTT device is created for test purpose"

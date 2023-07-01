@@ -1,0 +1,8 @@
+host: "localhost:1883"
+qos: 0
+keepAlive: 3600
+clientId: "device-mqtt"
+connEstablishingRetry: 10
+authMode: "none"
+# recive data from device broker sub/data/<device-name>
+subTopic: "sub/data/#"

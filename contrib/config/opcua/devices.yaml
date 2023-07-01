@@ -1,0 +1,6 @@
+devices:
+- name: "opcua-s001"
+  description: "OPCUA device is created for test purpose"
+  protocols:
+    opcua:
+      endpoint: "opc.tcp://127.0.0.1:53530/OPCUA/SimulationServer"
