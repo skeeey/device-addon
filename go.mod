@@ -4,7 +4,6 @@ go 1.20
 
 require (
 	github.com/eclipse/paho.mqtt.golang v1.4.2
-	github.com/evanphx/json-patch v4.12.0+incompatible
 	github.com/fsnotify/fsnotify v1.6.0
 	github.com/gopcua/opcua v0.4.0
 	github.com/spf13/cast v1.4.1
@@ -17,7 +16,6 @@ require (
 	k8s.io/client-go v0.26.1
 	k8s.io/component-base v0.26.1
 	k8s.io/klog/v2 v2.80.1
-	k8s.io/kube-openapi v0.0.0-20221012153701-172d655c2280
 	open-cluster-management.io/addon-framework v0.6.1
 	open-cluster-management.io/api v0.10.1-0.20230216050312-b716d4a5c514
 )
@@ -38,6 +36,7 @@ require (
 	github.com/cyphar/filepath-securejoin v0.2.3 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/emicklei/go-restful/v3 v3.9.0 // indirect
+	github.com/evanphx/json-patch v4.12.0+incompatible // indirect
 	github.com/fatih/structs v1.1.0 // indirect
 	github.com/felixge/httpsnoop v1.0.3 // indirect
 	github.com/go-logr/logr v1.2.3 // indirect
@@ -116,6 +115,7 @@ require (
 	helm.sh/helm/v3 v3.9.4 // indirect
 	k8s.io/apiextensions-apiserver v0.26.1 // indirect
 	k8s.io/kms v0.26.1 // indirect
+	k8s.io/kube-openapi v0.0.0-20221012153701-172d655c2280 // indirect
 	k8s.io/utils v0.0.0-20221128185143-99ec85e7a448 // indirect
 	sigs.k8s.io/apiserver-network-proxy/konnectivity-client v0.0.35 // indirect
 	sigs.k8s.io/json v0.0.0-20220713155537-f223a00ba0e2 // indirect
