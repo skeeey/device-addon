@@ -1,14 +1,14 @@
-package agent
+package device
 
 import (
 	"context"
 
 	"github.com/spf13/pflag"
 
-	"github.com/skeeey/device-addon/pkg/addon/spoke/agent/config"
-	"github.com/skeeey/device-addon/pkg/addon/spoke/agent/drivers"
-	"github.com/skeeey/device-addon/pkg/addon/spoke/agent/msgbus"
-	wacher "github.com/skeeey/device-addon/pkg/addon/spoke/agent/watcher"
+	"github.com/skeeey/device-addon/pkg/device/config"
+	"github.com/skeeey/device-addon/pkg/device/drivers"
+	"github.com/skeeey/device-addon/pkg/device/messagebuses"
+	"github.com/skeeey/device-addon/pkg/device/watcher"
 )
 
 type DriverAgentOptions struct {
@@ -30,9 +30,9 @@ func (o *DriverAgentOptions) RunDeviceAgent(ctx context.Context) error {
 		return err
 	}
 
-	msgBuses := []msgbus.MessageBus{}
+	msgBuses := []messagebuses.MessageBus{}
 	for msgBusType, msgBusInfo := range config.MessageBuses {
-		msgBus, err := msgbus.Get(msgBusType, msgBusInfo)
+		msgBus, err := messagebuses.Get(msgBusType, msgBusInfo)
 		if err != nil {
 			return err
 		}
@@ -49,12 +49,12 @@ func (o *DriverAgentOptions) RunDeviceAgent(ctx context.Context) error {
 			return err
 		}
 
-		watcher, err := wacher.NewDeviceConfigWatcher(driverInfo.ConfigDir, driver)
+		configWatcher, err := watcher.NewDeviceConfigWatcher(driverInfo.ConfigDir, driver)
 		if err != nil {
 			return err
 		}
 
-		go watcher.Watch()
+		go configWatcher.Watch()
 		go driver.Start()
 	}
 

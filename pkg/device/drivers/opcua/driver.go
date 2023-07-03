@@ -9,38 +9,39 @@ import (
 
 	"github.com/gopcua/opcua"
 	"github.com/gopcua/opcua/ua"
-	"github.com/skeeey/device-addon/pkg/addon/spoke/agent/config"
-	"github.com/skeeey/device-addon/pkg/addon/spoke/agent/config/device"
-	"github.com/skeeey/device-addon/pkg/addon/spoke/agent/models"
-	"github.com/skeeey/device-addon/pkg/addon/spoke/agent/msgbus"
-	"github.com/skeeey/device-addon/pkg/addon/spoke/agent/util"
+
 	"k8s.io/klog/v2"
+
+	"github.com/skeeey/device-addon/pkg/device/config"
+	"github.com/skeeey/device-addon/pkg/device/messagebuses"
+	"github.com/skeeey/device-addon/pkg/device/models"
+	"github.com/skeeey/device-addon/pkg/device/util"
 )
 
 type request struct {
 	nodeId *ua.NodeID
 	handle uint32
-	res    device.DeviceResource
+	res    config.DeviceResource
 }
 
 type OPCUADriver struct {
 	sync.Mutex
 	serverInfo       *OPCUAServerInfo
-	msgBuses         []msgbus.MessageBus
-	devices          map[string]models.Device
+	msgBuses         []messagebuses.MessageBus
+	devices          map[string]config.Device
 	deviceRequests   map[string][]request
 	deviceSubCancels map[string]context.CancelFunc
 }
 
 func NewOPCUADriver() *OPCUADriver {
 	return &OPCUADriver{
-		devices:          make(map[string]models.Device),
+		devices:          make(map[string]config.Device),
 		deviceRequests:   make(map[string][]request),
 		deviceSubCancels: make(map[string]context.CancelFunc),
 	}
 }
 
-func (d *OPCUADriver) Initialize(driverInfo config.DriverInfo, msgBuses []msgbus.MessageBus) error {
+func (d *OPCUADriver) Initialize(driverInfo config.DriverInfo, msgBuses []messagebuses.MessageBus) error {
 	var serverInfo = &OPCUAServerInfo{}
 	if err := util.LoadConfig(path.Join(driverInfo.ConfigDir, config.DriverConfigFileName), serverInfo); err != nil {
 		return err
@@ -60,25 +61,25 @@ func (d *OPCUADriver) Stop() error {
 	return nil
 }
 
-func (d *OPCUADriver) AddDevice(device models.Device) error {
+func (d *OPCUADriver) AddDevice(device config.Device) error {
 	d.Lock()
 	defer d.Unlock()
 
-	_, ok := d.devices[device.DeviceName]
+	_, ok := d.devices[device.Name]
 	if !ok {
 		go func() {
 			if err := d.startSubscription(device); err != nil {
-				klog.Errorf("failed to sub device %s, %v", device.DeviceName, err)
+				klog.Errorf("failed to sub device %s, %v", device.Name, err)
 			}
 		}()
 
-		d.devices[device.DeviceName] = device
+		d.devices[device.Name] = device
 	}
 
 	return nil
 }
 
-func (d *OPCUADriver) UpdateDevice(device models.Device) error {
+func (d *OPCUADriver) UpdateDevice(device config.Device) error {
 	//TODO
 	return nil
 }
@@ -93,8 +94,8 @@ func (d *OPCUADriver) HandleCommands(deviceName string, command models.Command) 
 	return nil
 }
 
-func (d *OPCUADriver) startSubscription(device models.Device) error {
-	_, ok := d.deviceSubCancels[device.DeviceName]
+func (d *OPCUADriver) startSubscription(device config.Device) error {
+	_, ok := d.deviceSubCancels[device.Name]
 	if ok {
 		return nil
 	}
@@ -102,9 +103,9 @@ func (d *OPCUADriver) startSubscription(device models.Device) error {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	d.deviceSubCancels[device.DeviceName] = cancel
+	d.deviceSubCancels[device.Name] = cancel
 
-	endpoint, err := d.findEndpoint(device.Device)
+	endpoint, err := d.findEndpoint(device)
 	if err != nil {
 		return err
 	}
@@ -151,8 +152,8 @@ func (d *OPCUADriver) startSubscription(device models.Device) error {
 
 	klog.Infof("Created subscription with id %v", sub.SubscriptionID)
 
-	for index, deviceResource := range device.DeviceProfile.DeviceResources {
-		req, err := d.toRequest(device.DeviceName, index, deviceResource)
+	for index, deviceResource := range device.Profile.DeviceResources {
+		req, err := d.toRequest(device.Name, index, deviceResource)
 		if err != nil {
 			return err
 		}
@@ -180,19 +181,19 @@ func (d *OPCUADriver) startSubscription(device models.Device) error {
 					data := item.Value.Value.Value()
 					klog.Infof("MonitoredItem with client handle %v = %v", item.ClientHandle, data)
 
-					req := d.findRequest(device.DeviceName, item.ClientHandle)
+					req := d.findRequest(device.Name, item.ClientHandle)
 					if req == nil {
 						continue
 					}
 
 					result, err := util.NewResult(req.res, data)
 					if err != nil {
-						klog.Errorf("The device %s attribute %s  is unsupported, %v", device.DeviceName, req.res.Name, err)
+						klog.Errorf("The device %s attribute %s  is unsupported, %v", device.Name, req.res.Name, err)
 						continue
 					}
 
 					for _, msgBus := range d.msgBuses {
-						msgBus.Publish(device.DeviceName, *result)
+						msgBus.Publish(device.Name, *result)
 					}
 				}
 
@@ -205,7 +206,7 @@ func (d *OPCUADriver) startSubscription(device models.Device) error {
 	}
 }
 
-func (d *OPCUADriver) findEndpoint(device *device.Device) (string, error) {
+func (d *OPCUADriver) findEndpoint(device config.Device) (string, error) {
 	protocols := device.Protocols
 	properties, ok := protocols[Protocol]
 	if !ok {
@@ -219,7 +220,7 @@ func (d *OPCUADriver) findEndpoint(device *device.Device) (string, error) {
 	return fmt.Sprintf("%v", endpoint), nil
 }
 
-func (d *OPCUADriver) toRequest(deviceName string, index int, res device.DeviceResource) (*request, error) {
+func (d *OPCUADriver) toRequest(deviceName string, index int, res config.DeviceResource) (*request, error) {
 	nodeId, err := getNodeID(res.Attributes, NODE)
 	if err != nil {
 		return nil, err

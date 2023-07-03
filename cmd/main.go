@@ -13,7 +13,7 @@ import (
 	"k8s.io/component-base/version"
 
 	"github.com/skeeey/device-addon/pkg/cmd/addon"
-	"github.com/skeeey/device-addon/pkg/cmd/agent"
+	"github.com/skeeey/device-addon/pkg/cmd/device"
 )
 
 func main() {
@@ -40,8 +40,8 @@ func main() {
 	}
 
 	cmd.AddCommand(addon.NewManagerCommand())
-	cmd.AddCommand(agent.NewAddOnAgentCommand())
-	cmd.AddCommand(agent.NewDriverAgentCommand())
+	cmd.AddCommand(addon.NewAgentCommand())
+	cmd.AddCommand(device.NewDriverCommand())
 
 	if err := cmd.Execute(); err != nil {
 		fmt.Fprintf(os.Stderr, "%v\n", err)

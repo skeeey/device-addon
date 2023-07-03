@@ -5,10 +5,11 @@ import (
 	"os"
 	"time"
 
-	"github.com/skeeey/device-addon/pkg/addon/spoke/agent/config/device"
-	"github.com/skeeey/device-addon/pkg/addon/spoke/agent/models"
 	"github.com/spf13/cast"
 	"gopkg.in/yaml.v2"
+
+	"github.com/skeeey/device-addon/pkg/device/config"
+	"github.com/skeeey/device-addon/pkg/device/models"
 )
 
 const castError = "fail to parse %v reading, %v"
@@ -26,7 +27,7 @@ func LoadConfig(configFile string, config any) error {
 	return nil
 }
 
-func NewResult(resource device.DeviceResource, reading interface{}) (*models.Result, error) {
+func NewResult(resource config.DeviceResource, reading interface{}) (*models.Result, error) {
 	var err error
 	valueType := resource.Properties.ValueType
 	if !checkValueInRange(valueType, reading) {
@@ -110,7 +111,7 @@ func NewResult(resource device.DeviceResource, reading interface{}) (*models.Res
 	}, nil
 }
 
-func FindDeviceResource(name string, resources []device.DeviceResource) *device.DeviceResource {
+func FindDeviceResource(name string, resources []config.DeviceResource) *config.DeviceResource {
 	for _, res := range resources {
 		if res.Name == name {
 			return &res

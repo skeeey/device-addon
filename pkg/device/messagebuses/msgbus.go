@@ -1,11 +1,11 @@
-package msgbus
+package messagebuses
 
 import (
 	"fmt"
 
-	"github.com/skeeey/device-addon/pkg/addon/spoke/agent/config"
-	"github.com/skeeey/device-addon/pkg/addon/spoke/agent/models"
-	"github.com/skeeey/device-addon/pkg/addon/spoke/agent/msgbus/mqtt"
+	"github.com/skeeey/device-addon/pkg/device/config"
+	"github.com/skeeey/device-addon/pkg/device/messagebuses/mqtt"
+	"github.com/skeeey/device-addon/pkg/device/models"
 )
 
 type MessageBus interface {

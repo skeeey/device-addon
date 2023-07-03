@@ -1,7 +1,5 @@
 package models
 
-import "github.com/skeeey/device-addon/pkg/addon/spoke/agent/config/device"
-
 const (
 	ValueTypeBool         = "Bool"
 	ValueTypeString       = "String"
@@ -31,18 +29,12 @@ const (
 	ValueTypeObject       = "Object"
 )
 
-type Attributes map[string]interface{}
+type Attributes map[string]any
 
 type Command struct {
 	// refer to DeviceProfile.DeviceCommand.Name
-	DeviceCommand string                               `yaml:"DeviceCommand"`
-	Protocols     map[string]device.ProtocolProperties `yaml:"protocols"`
-	Attributes    Attributes                           `yaml:"atrributes"`
-}
-
-type Device struct {
-	*device.Device
-	*device.DeviceProfile
+	DeviceCommand string     `yaml:"DeviceCommand"`
+	Attributes    Attributes `yaml:"atrributes"`
 }
 
 type Result struct {

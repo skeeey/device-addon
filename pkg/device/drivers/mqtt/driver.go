@@ -8,27 +8,29 @@ import (
 	"time"
 
 	mqtt "github.com/eclipse/paho.mqtt.golang"
-	"github.com/skeeey/device-addon/pkg/addon/spoke/agent/config"
-	"github.com/skeeey/device-addon/pkg/addon/spoke/agent/models"
-	"github.com/skeeey/device-addon/pkg/addon/spoke/agent/msgbus"
-	"github.com/skeeey/device-addon/pkg/addon/spoke/agent/util"
+
 	"k8s.io/klog/v2"
+
+	"github.com/skeeey/device-addon/pkg/device/config"
+	"github.com/skeeey/device-addon/pkg/device/messagebuses"
+	"github.com/skeeey/device-addon/pkg/device/models"
+	"github.com/skeeey/device-addon/pkg/device/util"
 )
 
 type MQTTDriver struct {
 	mqttBrokerInfo *MQTTBrokerInfo
 	mqttClient     mqtt.Client
-	devices        map[string]models.Device
-	msgBuses       []msgbus.MessageBus
+	devices        map[string]config.Device
+	msgBuses       []messagebuses.MessageBus
 }
 
 func NewMQTTDriver() *MQTTDriver {
 	return &MQTTDriver{
-		devices: make(map[string]models.Device),
+		devices: make(map[string]config.Device),
 	}
 }
 
-func (d *MQTTDriver) Initialize(driverInfo config.DriverInfo, msgBuses []msgbus.MessageBus) error {
+func (d *MQTTDriver) Initialize(driverInfo config.DriverInfo, msgBuses []messagebuses.MessageBus) error {
 	var mqttBrokerInfo = &MQTTBrokerInfo{}
 	if err := util.LoadConfig(path.Join(driverInfo.ConfigDir, config.DriverConfigFileName), mqttBrokerInfo); err != nil {
 		return err
@@ -56,20 +58,16 @@ func (d *MQTTDriver) Stop() error {
 	return nil
 }
 
-func (d *MQTTDriver) AddDevice(device models.Device) error {
-	if device.Device == nil {
-		return nil
-	}
-
-	_, ok := d.devices[device.DeviceName]
+func (d *MQTTDriver) AddDevice(device config.Device) error {
+	_, ok := d.devices[device.Name]
 	if !ok {
-		d.devices[device.DeviceName] = device
+		d.devices[device.Name] = device
 	}
 
 	return nil
 }
 
-func (d *MQTTDriver) UpdateDevice(device models.Device) error {
+func (d *MQTTDriver) UpdateDevice(device config.Device) error {
 	//TODO
 	return nil
 }
@@ -153,11 +151,6 @@ func (d *MQTTDriver) onIncomingDataReceived(_ mqtt.Client, message mqtt.Message)
 		return
 	}
 
-	if device.DeviceProfile == nil {
-		klog.Infof("Ignore the device %s, becasue it have not profile", deviceName)
-		return
-	}
-
 	data := make(models.Attributes)
 	if err := json.Unmarshal(message.Payload(), &data); err != nil {
 		klog.Errorf("failed to unmarshaling incoming data for device %s, %v", deviceName, err)
@@ -165,7 +158,7 @@ func (d *MQTTDriver) onIncomingDataReceived(_ mqtt.Client, message mqtt.Message)
 	}
 
 	for key, val := range data {
-		res := util.FindDeviceResource(key, device.DeviceResources)
+		res := util.FindDeviceResource(key, device.Profile.DeviceResources)
 		if res == nil {
 			klog.Warningf("The device  %s attribute %s  is unsupported", deviceName, key)
 			continue

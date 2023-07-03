@@ -6,9 +6,11 @@ import (
 	"time"
 
 	mqtt "github.com/eclipse/paho.mqtt.golang"
-	"github.com/skeeey/device-addon/pkg/addon/spoke/agent/config"
-	"github.com/skeeey/device-addon/pkg/addon/spoke/agent/models"
+
 	"k8s.io/klog/v2"
+
+	"github.com/skeeey/device-addon/pkg/device/config"
+	"github.com/skeeey/device-addon/pkg/device/models"
 )
 
 const (

@@ -5,7 +5,7 @@ import (
 
 	"github.com/spf13/cast"
 
-	"github.com/skeeey/device-addon/pkg/addon/spoke/agent/models"
+	"github.com/skeeey/device-addon/pkg/device/models"
 )
 
 func checkValueInRange(valueType string, reading interface{}) bool {

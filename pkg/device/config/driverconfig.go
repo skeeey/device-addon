@@ -7,9 +7,8 @@ import (
 )
 
 const (
-	DevicesFileName        = "devices.yaml"
-	DeviceProfilesFileName = "devices.profile.yaml"
-	DriverConfigFileName   = "config.yaml"
+	DevicesFileName      = "devices.yaml"
+	DriverConfigFileName = "config.yaml"
 )
 
 type DriverConfig struct {
