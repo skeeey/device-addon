@@ -3,19 +3,20 @@ package messagebuses
 import (
 	"fmt"
 
-	"github.com/skeeey/device-addon/pkg/device/config"
+	"github.com/skeeey/device-addon/pkg/apis/v1alpha1"
 	"github.com/skeeey/device-addon/pkg/device/messagebuses/mqtt"
-	"github.com/skeeey/device-addon/pkg/device/models"
+	"github.com/skeeey/device-addon/pkg/device/util"
 )
 
 type MessageBus interface {
-	Init(msgBusInfo config.MessageBusInfo) error
+	Init(msgBusInfo v1alpha1.MessageBusConfig) error
 	Connect() error
-	Publish(deviceName string, result models.Result)
+	Publish(deviceName string, result util.Result)
 	Subscribe()
+	Stop()
 }
 
-func Get(msgBusType string, msgBusInfo config.MessageBusInfo) (MessageBus, error) {
+func Get(msgBusType string, msgBusInfo v1alpha1.MessageBusConfig) (MessageBus, error) {
 	switch msgBusType {
 	case "mqtt":
 		if !msgBusInfo.Enabled {

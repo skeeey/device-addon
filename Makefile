@@ -2,8 +2,8 @@
 # Image URL to use all building/pushing image targets
 IMG ?= quay.io/skeeey/device-addon:latest
 
-CONTROLLER_TOOLS_VERSION ?= v0.9.2
-CODE_GENERATOR_VERSION ?= v0.26.1
+CONTROLLER_TOOLS_VERSION ?= v0.12.0
+CODE_GENERATOR_VERSION ?= v0.27.3
 
 LOCALBIN ?= $(shell pwd)/bin
 $(LOCALBIN):

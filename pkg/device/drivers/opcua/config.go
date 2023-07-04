@@ -8,10 +8,8 @@ const (
 const NODE = "nodeId"
 
 type OPCUAServerInfo struct {
-	// Security policy: None, Basic128Rsa15, Basic256, Basic256Sha256
-	SecurityPolicy string `yaml:"securityPolicy"`
-	// Security mode: None, Sign, SignAndEncrypt
-	SecurityMode string `yaml:"securityMode"`
-	CertFile     string `yaml:"certFile"`
-	KeyFile      string `yaml:"keyFile"`
+	SecurityPolicy string `json:"securityPolicy"` // Security policy: None, Basic128Rsa15, Basic256, Basic256Sha256
+	SecurityMode   string `json:"securityMode"`   // Security mode: None, Sign, SignAndEncrypt
+	CertFile       string `json:"certFile"`
+	KeyFile        string `json:"keyFile"`
 }

@@ -1,8 +1,19 @@
 drivers:
- "opcua":
-    configDir: "/Users/liuwei/go/src/github.com/skeeey/device-addon/contrib/config/opcua"
+  opcua:
+    securityPolicy: "None"
+    securityMode: "None"
+    certFile: ""
+    keyFile: ""
+  # mqtt:
+  #   host: "localhost:1883"
+  #   qos: 0
+  #   keepAlive: 3600
+  #   clientId: "device-mqtt"
+  #   connEstablishingRetry: 10
+  #   authMode: "none"
+  #   subTopic: "sub/data/#"  # device broker sub topic, we use this topic to get data from device
 messageBuses:
-  "mqtt":
+  mqtt:
     enabled: true
     properties:
       publishTopic: "/ocm/devices/%s/data/%s" # /ocm/devices/<device name>/data/<data name>

@@ -1,6 +1,7 @@
 package util
 
 import (
+	"encoding/json"
 	"fmt"
 	"os"
 	"time"
@@ -8,8 +9,7 @@ import (
 	"github.com/spf13/cast"
 	"gopkg.in/yaml.v2"
 
-	"github.com/skeeey/device-addon/pkg/device/config"
-	"github.com/skeeey/device-addon/pkg/device/models"
+	"github.com/skeeey/device-addon/pkg/apis/v1alpha1"
 )
 
 const castError = "fail to parse %v reading, %v"
@@ -27,7 +27,16 @@ func LoadConfig(configFile string, config any) error {
 	return nil
 }
 
-func NewResult(resource config.DeviceResource, reading interface{}) (*models.Result, error) {
+func ToConfigObj(configProperties map[string]interface{}, configObj any) error {
+	data, err := json.Marshal(configProperties)
+	if err != nil {
+		return err
+	}
+
+	return json.Unmarshal(data, configObj)
+}
+
+func NewResult(resource v1alpha1.DeviceResource, reading interface{}) (*Result, error) {
 	var err error
 	valueType := resource.Properties.ValueType
 	if !checkValueInRange(valueType, reading) {
@@ -36,74 +45,74 @@ func NewResult(resource config.DeviceResource, reading interface{}) (*models.Res
 
 	var val interface{}
 	switch valueType {
-	case models.ValueTypeBool:
+	case ValueTypeBool:
 		val, err = cast.ToBoolE(reading)
 		if err != nil {
 			return nil, fmt.Errorf(castError, resource.Name, err)
 		}
-	case models.ValueTypeString:
+	case ValueTypeString:
 		val, err = cast.ToStringE(reading)
 		if err != nil {
 			return nil, fmt.Errorf(castError, resource.Name, err)
 		}
-	case models.ValueTypeUint8:
+	case ValueTypeUint8:
 		val, err = cast.ToUint8E(reading)
 		if err != nil {
 			return nil, fmt.Errorf(castError, resource.Name, err)
 		}
-	case models.ValueTypeUint16:
+	case ValueTypeUint16:
 		val, err = cast.ToUint16E(reading)
 		if err != nil {
 			return nil, fmt.Errorf(castError, resource.Name, err)
 		}
-	case models.ValueTypeUint32:
+	case ValueTypeUint32:
 		val, err = cast.ToUint32E(reading)
 		if err != nil {
 			return nil, fmt.Errorf(castError, resource.Name, err)
 		}
-	case models.ValueTypeUint64:
+	case ValueTypeUint64:
 		val, err = cast.ToUint64E(reading)
 		if err != nil {
 			return nil, fmt.Errorf(castError, resource.Name, err)
 		}
-	case models.ValueTypeInt8:
+	case ValueTypeInt8:
 		val, err = cast.ToInt8E(reading)
 		if err != nil {
 			return nil, fmt.Errorf(castError, resource.Name, err)
 		}
-	case models.ValueTypeInt16:
+	case ValueTypeInt16:
 		val, err = cast.ToInt16E(reading)
 		if err != nil {
 			return nil, fmt.Errorf(castError, resource.Name, err)
 		}
-	case models.ValueTypeInt32:
+	case ValueTypeInt32:
 		val, err = cast.ToInt32E(reading)
 		if err != nil {
 			return nil, fmt.Errorf(castError, resource.Name, err)
 		}
-	case models.ValueTypeInt64:
+	case ValueTypeInt64:
 		val, err = cast.ToInt64E(reading)
 		if err != nil {
 			return nil, fmt.Errorf(castError, resource.Name, err)
 		}
-	case models.ValueTypeFloat32:
+	case ValueTypeFloat32:
 		val, err = cast.ToFloat32E(reading)
 		if err != nil {
 			return nil, fmt.Errorf(castError, resource.Name, err)
 		}
-	case models.ValueTypeFloat64:
+	case ValueTypeFloat64:
 		val, err = cast.ToFloat64E(reading)
 		if err != nil {
 			return nil, fmt.Errorf(castError, resource.Name, err)
 		}
-	case models.ValueTypeObject:
+	case ValueTypeObject:
 		val = reading
 	default:
 		return nil, fmt.Errorf("return result fail, none supported value type: %v", valueType)
 
 	}
 
-	return &models.Result{
+	return &Result{
 		Name:            resource.Name,
 		Type:            valueType,
 		Value:           val,
@@ -111,7 +120,7 @@ func NewResult(resource config.DeviceResource, reading interface{}) (*models.Res
 	}, nil
 }
 
-func FindDeviceResource(name string, resources []config.DeviceResource) *config.DeviceResource {
+func FindDeviceResource(name string, resources []v1alpha1.DeviceResource) *v1alpha1.DeviceResource {
 	for _, res := range resources {
 		if res.Name == name {
 			return &res

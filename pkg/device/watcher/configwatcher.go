@@ -7,18 +7,28 @@ import (
 	"k8s.io/apimachinery/pkg/api/equality"
 	"k8s.io/klog/v2"
 
-	"github.com/skeeey/device-addon/pkg/device/config"
+	"github.com/skeeey/device-addon/pkg/apis/v1alpha1"
 	"github.com/skeeey/device-addon/pkg/device/drivers"
 	"github.com/skeeey/device-addon/pkg/device/util"
 )
 
-type DeviceConfigWatcher struct {
-	watcher *fsnotify.Watcher
-	devices map[string]config.Device
+const devicesConfigFileName = "devices.yaml"
+
+type Equipment struct {
 	driver  drivers.Driver
+	devices map[string]v1alpha1.DeviceConfig
 }
 
-func NewDeviceConfigWatcher(configDir string, driver drivers.Driver) (*DeviceConfigWatcher, error) {
+type DeviceList struct {
+	Devices []v1alpha1.DeviceConfig
+}
+
+type DeviceConfigWatcher struct {
+	watcher    *fsnotify.Watcher
+	equipments map[string]Equipment
+}
+
+func NewDeviceConfigWatcher(configDir string, drivers []drivers.Driver) (*DeviceConfigWatcher, error) {
 	watcher, err := fsnotify.NewWatcher()
 	if err != nil {
 		return nil, err
@@ -28,20 +38,26 @@ func NewDeviceConfigWatcher(configDir string, driver drivers.Driver) (*DeviceCon
 		return nil, err
 	}
 
-	deviceList := &config.DeviceList{}
-	if err := util.LoadConfig(path.Join(configDir, config.DevicesFileName), deviceList); err != nil {
+	deviceList := &DeviceList{}
+	if err := util.LoadConfig(path.Join(configDir, devicesConfigFileName), deviceList); err != nil {
 		return nil, err
 	}
 
 	deviceWatcher := &DeviceConfigWatcher{
-		watcher: watcher,
-		devices: make(map[string]config.Device),
-		driver:  driver,
+		watcher:    watcher,
+		equipments: make(map[string]Equipment),
 	}
 
-	if deviceWatcher.update(deviceList.Devices) {
-		for _, device := range deviceWatcher.devices {
-			driver.AddDevice(device)
+	for _, driver := range drivers {
+		deviceWatcher.equipments[driver.GetType()] = Equipment{
+			driver:  driver,
+			devices: make(map[string]v1alpha1.DeviceConfig),
+		}
+	}
+
+	for _, equipment := range deviceWatcher.equipments {
+		if err := deviceWatcher.update(equipment, deviceList.Devices); err != nil {
+			return nil, err
 		}
 	}
 
@@ -74,13 +90,19 @@ func (dcw *DeviceConfigWatcher) Watch() {
 }
 
 // TODO also return deleted device list
-func (dcw *DeviceConfigWatcher) update(devices []config.Device) bool {
-	updated := false
+func (dcw *DeviceConfigWatcher) update(equipment Equipment, devices []v1alpha1.DeviceConfig) error {
 	for _, device := range devices {
-		lastDevice, ok := dcw.devices[device.Name]
+		if device.DriverType != equipment.driver.GetType() {
+			continue
+		}
+
+		lastDevice, ok := equipment.devices[device.Name]
 		if !ok {
-			dcw.devices[device.Name] = device
-			updated = true
+			if err := equipment.driver.AddDevice(device); err != nil {
+				return err
+			}
+
+			equipment.devices[device.Name] = device
 			continue
 		}
 
@@ -88,9 +110,12 @@ func (dcw *DeviceConfigWatcher) update(devices []config.Device) bool {
 			continue
 		}
 
-		dcw.devices[device.Name] = device
-		updated = true
+		if err := equipment.driver.UpdateDevice(device); err != nil {
+			return err
+		}
+
+		equipment.devices[device.Name] = device
 	}
 
-	return updated
+	return nil
 }

@@ -1,4 +1,4 @@
-package models
+package util
 
 const (
 	ValueTypeBool         = "Bool"
@@ -28,6 +28,8 @@ const (
 	ValueTypeFloat64Array = "Float64Array"
 	ValueTypeObject       = "Object"
 )
+
+type ConfigProperties map[string]any
 
 type Attributes map[string]any
 

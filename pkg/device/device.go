@@ -2,17 +2,22 @@ package device
 
 import (
 	"context"
+	"path"
 
 	"github.com/spf13/pflag"
+	"k8s.io/klog/v2"
 
-	"github.com/skeeey/device-addon/pkg/device/config"
+	"github.com/skeeey/device-addon/pkg/apis/v1alpha1"
 	"github.com/skeeey/device-addon/pkg/device/drivers"
 	"github.com/skeeey/device-addon/pkg/device/messagebuses"
+	"github.com/skeeey/device-addon/pkg/device/util"
 	"github.com/skeeey/device-addon/pkg/device/watcher"
 )
 
+const driverConfigFileName = "config.yaml"
+
 type DriverAgentOptions struct {
-	ConfigFile string
+	ConfigDir string
 }
 
 func NewDriverAgentOptions() *DriverAgentOptions {
@@ -20,19 +25,21 @@ func NewDriverAgentOptions() *DriverAgentOptions {
 }
 
 func (o *DriverAgentOptions) AddFlags(flags *pflag.FlagSet) {
-	flags.StringVar(&o.ConfigFile, "driver-config", o.ConfigFile, "Location of driver file")
+	flags.StringVar(&o.ConfigDir, "config-dir", o.ConfigDir, "Directory of config files")
 }
 
 // RunAgent starts the controllers on agent to process work from hub.
-func (o *DriverAgentOptions) RunDeviceAgent(ctx context.Context) error {
-	config, err := config.LoadConfig(o.ConfigFile)
-	if err != nil {
+func (o *DriverAgentOptions) RunDriverAgent(ctx context.Context) error {
+	config := &v1alpha1.Config{}
+	if err := util.LoadConfig(path.Join(o.ConfigDir, driverConfigFileName), config); err != nil {
 		return err
 	}
 
+	klog.Infof("-----------> %+v", config)
+
 	msgBuses := []messagebuses.MessageBus{}
-	for msgBusType, msgBusInfo := range config.MessageBuses {
-		msgBus, err := messagebuses.Get(msgBusType, msgBusInfo)
+	for mType, mConfig := range config.MessageBuses {
+		msgBus, err := messagebuses.Get(mType, mConfig)
 		if err != nil {
 			return err
 		}
@@ -43,19 +50,25 @@ func (o *DriverAgentOptions) RunDeviceAgent(ctx context.Context) error {
 		msgBuses = append(msgBuses, msgBus)
 	}
 
-	for driverType, driverInfo := range config.Drivers {
-		driver, err := drivers.Get(driverType, driverInfo, msgBuses)
+	allDrivers := []drivers.Driver{}
+	for driverType, driverConfig := range config.Drivers {
+		driver, err := drivers.Get(driverType, driverConfig.Data, msgBuses)
 		if err != nil {
 			return err
 		}
 
-		configWatcher, err := watcher.NewDeviceConfigWatcher(driverInfo.ConfigDir, driver)
-		if err != nil {
-			return err
-		}
+		allDrivers = append(allDrivers, driver)
+	}
 
-		go configWatcher.Watch()
-		go driver.Start()
+	configWatcher, err := watcher.NewDeviceConfigWatcher(o.ConfigDir, allDrivers)
+	if err != nil {
+		return err
+	}
+
+	go configWatcher.Watch()
+
+	for _, d := range allDrivers {
+		go d.Start()
 	}
 
 	<-ctx.Done()

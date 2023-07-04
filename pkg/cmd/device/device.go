@@ -31,7 +31,7 @@ func NewDriverCommand() *cobra.Command {
 			ctx, terminate := context.WithCancel(shutdownCtx)
 			defer terminate()
 
-			if err := o.RunDeviceAgent(ctx); err != nil {
+			if err := o.RunDriverAgent(ctx); err != nil {
 				klog.Fatal(err)
 			}
 		},

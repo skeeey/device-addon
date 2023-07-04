@@ -12,6 +12,6 @@ set -x
 
 GOBIN=${REPO_DIR}/bin
 
-$GOBIN/controller-gen crd \
+$GOBIN/controller-gen crd:allowDangerousTypes=true \
     paths="${REPO_DIR}/pkg/apis/v1alpha1" \
     output:crd:artifacts:config="${REPO_DIR}/contrib/deploy/crds"

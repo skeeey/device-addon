@@ -4,20 +4,21 @@ kind: CustomResourceDefinition
 metadata:
   annotations:
     controller-gen.kubebuilder.io/version: v0.12.0
-  name: devices.edge.open-cluster-management.io
+  name: deviceaddonconfigs.edge.open-cluster-management.io
 spec:
   group: edge.open-cluster-management.io
   names:
-    kind: Device
-    listKind: DeviceList
-    plural: devices
-    singular: device
+    kind: DeviceAddOnConfig
+    listKind: DeviceAddOnConfigList
+    plural: deviceaddonconfigs
+    singular: deviceaddonconfig
   scope: Namespaced
   versions:
   - name: v1alpha1
     schema:
       openAPIV3Schema:
-        description: Device is the Schema for the devices API
+        description: DeviceAddOnConfig is the schema for the device addon configuration
+          API
         properties:
           apiVersion:
             description: 'APIVersion defines the versioned schema of this representation
@@ -32,94 +33,24 @@ spec:
           metadata:
             type: object
           spec:
-            description: spec holds the information about a device.
+            description: spec holds the configuration about a device addon.
             properties:
-              description:
-                type: string
-              driverType:
-                type: string
-              manufacturer:
-                type: string
-              model:
-                type: string
-              name:
-                type: string
-              profile:
-                properties:
-                  deviceCommands:
-                    items:
-                      properties:
-                        name:
-                          type: string
-                        readWrite:
-                          description: '''R'' ''W'' ''RW'' ''WR'' are supported'
-                          type: string
-                        resources:
-                          items:
-                            properties:
-                              defaultValue:
-                                type: string
-                              deviceResource:
-                                type: string
-                            type: object
-                          type: array
-                      type: object
-                    type: array
-                  deviceResources:
-                    items:
-                      properties:
-                        attributes:
-                          type: object
-                        description:
-                          type: string
-                        name:
-                          type: string
-                        properties:
-                          properties:
-                            assertion:
-                              type: string
-                            base:
-                              type: number
-                            defaultValue:
-                              type: string
-                            mask:
-                              format: int64
-                              type: integer
-                            maximum:
-                              type: number
-                            mediaType:
-                              type: string
-                            minimum:
-                              type: number
-                            offset:
-                              type: number
-                            optional:
-                              type: object
-                            readWrite:
-                              description: '''R'' ''W'' ''RW'' ''WR'' are supported'
-                              type: string
-                            scale:
-                              type: number
-                            shift:
-                              format: int64
-                              type: integer
-                            units:
-                              type: string
-                            valueType:
-                              type: string
-                          type: object
-                      type: object
-                    type: array
-                type: object
-              properties:
-                type: object
-              protocols:
+              drivers:
                 additionalProperties:
+                  type: object
+                type: object
+              messageBuses:
+                additionalProperties:
+                  properties:
+                    enabled:
+                      type: boolean
+                    properties:
+                      type: object
                   type: object
                 type: object
             type: object
           status:
-            description: status holds the state of a device.
+            description: status holds the state of this configuration.
             properties:
               conditions:
                 description: conditions describe the state of the current device.

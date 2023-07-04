@@ -3,7 +3,6 @@ package mqtt
 import (
 	"encoding/json"
 	"fmt"
-	"path"
 	"strings"
 	"time"
 
@@ -11,28 +10,27 @@ import (
 
 	"k8s.io/klog/v2"
 
-	"github.com/skeeey/device-addon/pkg/device/config"
+	"github.com/skeeey/device-addon/pkg/apis/v1alpha1"
 	"github.com/skeeey/device-addon/pkg/device/messagebuses"
-	"github.com/skeeey/device-addon/pkg/device/models"
 	"github.com/skeeey/device-addon/pkg/device/util"
 )
 
 type MQTTDriver struct {
 	mqttBrokerInfo *MQTTBrokerInfo
 	mqttClient     mqtt.Client
-	devices        map[string]config.Device
+	devices        map[string]v1alpha1.DeviceConfig
 	msgBuses       []messagebuses.MessageBus
 }
 
 func NewMQTTDriver() *MQTTDriver {
 	return &MQTTDriver{
-		devices: make(map[string]config.Device),
+		devices: make(map[string]v1alpha1.DeviceConfig),
 	}
 }
 
-func (d *MQTTDriver) Initialize(driverInfo config.DriverInfo, msgBuses []messagebuses.MessageBus) error {
+func (d *MQTTDriver) Initialize(driverConfig util.ConfigProperties, msgBuses []messagebuses.MessageBus) error {
 	var mqttBrokerInfo = &MQTTBrokerInfo{}
-	if err := util.LoadConfig(path.Join(driverInfo.ConfigDir, config.DriverConfigFileName), mqttBrokerInfo); err != nil {
+	if err := util.ToConfigObj(driverConfig, mqttBrokerInfo); err != nil {
 		return err
 	}
 
@@ -43,6 +41,10 @@ func (d *MQTTDriver) Initialize(driverInfo config.DriverInfo, msgBuses []message
 	d.msgBuses = msgBuses
 	d.mqttBrokerInfo = mqttBrokerInfo
 	return nil
+}
+
+func (d *MQTTDriver) GetType() string {
+	return "mqtt"
 }
 
 func (d *MQTTDriver) Start() error {
@@ -58,7 +60,7 @@ func (d *MQTTDriver) Stop() error {
 	return nil
 }
 
-func (d *MQTTDriver) AddDevice(device config.Device) error {
+func (d *MQTTDriver) AddDevice(device v1alpha1.DeviceConfig) error {
 	_, ok := d.devices[device.Name]
 	if !ok {
 		d.devices[device.Name] = device
@@ -67,7 +69,7 @@ func (d *MQTTDriver) AddDevice(device config.Device) error {
 	return nil
 }
 
-func (d *MQTTDriver) UpdateDevice(device config.Device) error {
+func (d *MQTTDriver) UpdateDevice(device v1alpha1.DeviceConfig) error {
 	//TODO
 	return nil
 }
@@ -77,7 +79,7 @@ func (d *MQTTDriver) RemoveDevice(deviceName string) error {
 	return nil
 }
 
-func (d *MQTTDriver) HandleCommands(deviceName string, command models.Command) error {
+func (d *MQTTDriver) HandleCommands(deviceName string, command util.Command) error {
 	// TODO
 	return nil
 }
@@ -151,7 +153,7 @@ func (d *MQTTDriver) onIncomingDataReceived(_ mqtt.Client, message mqtt.Message)
 		return
 	}
 
-	data := make(models.Attributes)
+	data := make(util.Attributes)
 	if err := json.Unmarshal(message.Payload(), &data); err != nil {
 		klog.Errorf("failed to unmarshaling incoming data for device %s, %v", deviceName, err)
 		return

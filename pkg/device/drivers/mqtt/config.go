@@ -1,16 +1,16 @@
 package mqtt
 
 type MQTTBrokerInfo struct {
-	Host      string `yaml:"host"`
-	Qos       int    `yaml:"qos"`
-	KeepAlive int    `yaml:"keepAlive"`
-	ClientId  string `yaml:"clientId"`
+	Host      string `json:"host"`
+	ClientId  string `json:"clientId"`
+	Qos       int    `json:"qos"`
+	KeepAlive int    `json:"keepAlive"`
 
-	ConnEstablishingRetry int `yaml:"connEstablishingRetry"`
+	ConnEstablishingRetry int `json:"connEstablishingRetry"`
 
-	AuthMode      string `yaml:"authMode"`
-	CredentialDir string `yaml:"credentialDir"`
+	AuthMode      string `json:"authMode"`
+	CredentialDir string `json:"credentialDir"`
 
-	SubTopic string `yaml:"subTopic"`
-	PubTopic string `yaml:"pubTopic"`
+	SubTopic string `json:"subTopic"`
+	PubTopic string `json:"pubTopic"`
 }

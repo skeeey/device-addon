@@ -3,7 +3,6 @@ package opcua
 import (
 	"context"
 	"fmt"
-	"path"
 	"sync"
 	"time"
 
@@ -12,44 +11,47 @@ import (
 
 	"k8s.io/klog/v2"
 
-	"github.com/skeeey/device-addon/pkg/device/config"
+	"github.com/skeeey/device-addon/pkg/apis/v1alpha1"
 	"github.com/skeeey/device-addon/pkg/device/messagebuses"
-	"github.com/skeeey/device-addon/pkg/device/models"
 	"github.com/skeeey/device-addon/pkg/device/util"
 )
 
 type request struct {
 	nodeId *ua.NodeID
 	handle uint32
-	res    config.DeviceResource
+	res    v1alpha1.DeviceResource
 }
 
 type OPCUADriver struct {
 	sync.Mutex
 	serverInfo       *OPCUAServerInfo
 	msgBuses         []messagebuses.MessageBus
-	devices          map[string]config.Device
+	devices          map[string]v1alpha1.DeviceConfig
 	deviceRequests   map[string][]request
 	deviceSubCancels map[string]context.CancelFunc
 }
 
 func NewOPCUADriver() *OPCUADriver {
 	return &OPCUADriver{
-		devices:          make(map[string]config.Device),
+		devices:          make(map[string]v1alpha1.DeviceConfig),
 		deviceRequests:   make(map[string][]request),
 		deviceSubCancels: make(map[string]context.CancelFunc),
 	}
 }
 
-func (d *OPCUADriver) Initialize(driverInfo config.DriverInfo, msgBuses []messagebuses.MessageBus) error {
+func (d *OPCUADriver) Initialize(driverConfig util.ConfigProperties, msgBuses []messagebuses.MessageBus) error {
 	var serverInfo = &OPCUAServerInfo{}
-	if err := util.LoadConfig(path.Join(driverInfo.ConfigDir, config.DriverConfigFileName), serverInfo); err != nil {
+	if err := util.ToConfigObj(driverConfig, serverInfo); err != nil {
 		return err
 	}
 
 	d.msgBuses = msgBuses
 	d.serverInfo = serverInfo
 	return nil
+}
+
+func (d *OPCUADriver) GetType() string {
+	return "opcua"
 }
 
 func (d *OPCUADriver) Start() error {
@@ -61,7 +63,7 @@ func (d *OPCUADriver) Stop() error {
 	return nil
 }
 
-func (d *OPCUADriver) AddDevice(device config.Device) error {
+func (d *OPCUADriver) AddDevice(device v1alpha1.DeviceConfig) error {
 	d.Lock()
 	defer d.Unlock()
 
@@ -79,7 +81,7 @@ func (d *OPCUADriver) AddDevice(device config.Device) error {
 	return nil
 }
 
-func (d *OPCUADriver) UpdateDevice(device config.Device) error {
+func (d *OPCUADriver) UpdateDevice(device v1alpha1.DeviceConfig) error {
 	//TODO
 	return nil
 }
@@ -89,12 +91,12 @@ func (d *OPCUADriver) RemoveDevice(deviceName string) error {
 	return nil
 }
 
-func (d *OPCUADriver) HandleCommands(deviceName string, command models.Command) error {
+func (d *OPCUADriver) HandleCommands(deviceName string, command util.Command) error {
 	//TODO
 	return nil
 }
 
-func (d *OPCUADriver) startSubscription(device config.Device) error {
+func (d *OPCUADriver) startSubscription(device v1alpha1.DeviceConfig) error {
 	_, ok := d.deviceSubCancels[device.Name]
 	if ok {
 		return nil
@@ -206,21 +208,21 @@ func (d *OPCUADriver) startSubscription(device config.Device) error {
 	}
 }
 
-func (d *OPCUADriver) findEndpoint(device config.Device) (string, error) {
+func (d *OPCUADriver) findEndpoint(device v1alpha1.DeviceConfig) (string, error) {
 	protocols := device.Protocols
 	properties, ok := protocols[Protocol]
 	if !ok {
 		return "", fmt.Errorf("opcua protocol properties is not defined")
 	}
 
-	endpoint, ok := properties[Endpoint]
+	endpoint, ok := properties.Data[Endpoint]
 	if !ok {
 		return "", fmt.Errorf("endpoint not found in the opcua protocol properties")
 	}
 	return fmt.Sprintf("%v", endpoint), nil
 }
 
-func (d *OPCUADriver) toRequest(deviceName string, index int, res config.DeviceResource) (*request, error) {
+func (d *OPCUADriver) toRequest(deviceName string, index int, res v1alpha1.DeviceResource) (*request, error) {
 	nodeId, err := getNodeID(res.Attributes, NODE)
 	if err != nil {
 		return nil, err
@@ -267,8 +269,8 @@ func valueRequest(req *request) *ua.MonitoredItemCreateRequest {
 	return opcua.NewMonitoredItemCreateRequestWithDefaults(req.nodeId, ua.AttributeIDValue, req.handle)
 }
 
-func getNodeID(attrs map[string]interface{}, id string) (string, error) {
-	identifier, ok := attrs[id]
+func getNodeID(attrs v1alpha1.Values, id string) (string, error) {
+	identifier, ok := attrs.Data[id]
 	if !ok {
 		return "", fmt.Errorf("attribute %s does not exist", id)
 	}
