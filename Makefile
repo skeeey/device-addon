@@ -14,17 +14,9 @@ $(LOCALBIN):
 build:
 	go build -o bin/device-addon cmd/main.go
 
-.PHONY: build-thermometer
-build-thermometer:
-	go build -o bin/thermometer contrib/demo/device/thermometer.go
-
 .PHONY: image
 image:
 	docker build -t ${IMG} .
-
-.PHONY: image-push
-image-push: image
-	docker push ${IMG}
 
 ## deploy and run demo
 .PHONY: deploy
