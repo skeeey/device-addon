@@ -22,25 +22,18 @@ type MQTTDriver struct {
 	msgBuses       []messagebuses.MessageBus
 }
 
-func NewMQTTDriver() *MQTTDriver {
-	return &MQTTDriver{
-		devices: make(map[string]v1alpha1.DeviceConfig),
-	}
-}
-
-func (d *MQTTDriver) Initialize(driverConfig util.ConfigProperties, msgBuses []messagebuses.MessageBus) error {
+func NewMQTTDriver(driverConfig util.ConfigProperties, msgBuses []messagebuses.MessageBus) *MQTTDriver {
 	var mqttBrokerInfo = &MQTTBrokerInfo{}
 	if err := util.ToConfigObj(driverConfig, mqttBrokerInfo); err != nil {
-		return err
+		klog.Errorf("failed to parse mqtt drirver config, %v", err)
+		return nil
 	}
 
-	if err := d.createMQTTClient(); err != nil {
-		return err
+	return &MQTTDriver{
+		devices:        make(map[string]v1alpha1.DeviceConfig),
+		msgBuses:       msgBuses,
+		mqttBrokerInfo: mqttBrokerInfo,
 	}
-
-	d.msgBuses = msgBuses
-	d.mqttBrokerInfo = mqttBrokerInfo
-	return nil
 }
 
 func (d *MQTTDriver) GetType() string {
@@ -48,16 +41,17 @@ func (d *MQTTDriver) GetType() string {
 }
 
 func (d *MQTTDriver) Start() error {
-	//do nothing
+	if err := d.createMQTTClient(); err != nil {
+		return err
+	}
 	return nil
 }
 
-func (d *MQTTDriver) Stop() error {
+func (d *MQTTDriver) Stop() {
 	klog.Info("driver is stopping, disconnect the MQTT conn")
 	if d.mqttClient.IsConnected() {
 		d.mqttClient.Disconnect(5000)
 	}
-	return nil
 }
 
 func (d *MQTTDriver) AddDevice(device v1alpha1.DeviceConfig) error {
@@ -69,17 +63,12 @@ func (d *MQTTDriver) AddDevice(device v1alpha1.DeviceConfig) error {
 	return nil
 }
 
-func (d *MQTTDriver) UpdateDevice(device v1alpha1.DeviceConfig) error {
-	//TODO
-	return nil
-}
-
 func (d *MQTTDriver) RemoveDevice(deviceName string) error {
 	//TODO
 	return nil
 }
 
-func (d *MQTTDriver) HandleCommands(deviceName string, command util.Command) error {
+func (d *MQTTDriver) RunCommand(command util.Command) error {
 	// TODO
 	return nil
 }
@@ -174,7 +163,7 @@ func (d *MQTTDriver) onIncomingDataReceived(_ mqtt.Client, message mqtt.Message)
 
 		// publish the message to message bus
 		for _, msgBus := range d.msgBuses {
-			msgBus.Publish(deviceName, *result)
+			msgBus.ReceiveData(deviceName, *result)
 		}
 	}
 }

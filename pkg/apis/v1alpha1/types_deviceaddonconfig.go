@@ -32,23 +32,19 @@ type DeviceAddOnConfigList struct {
 }
 
 type DeviceAddOnConfigSpec struct {
-	Config `json:",inline"`
+	MessageBuses []MessageBusConfig `yaml:"messageBuses" json:"messageBuses"`
 }
 
 type DeviceAddOnConfigSpecStatus struct {
-	// conditions describe the state of the current device.
+	// conditions describe the state of the current configuration.
 	// +patchMergeKey=type
 	// +patchStrategy=merge
 	// +optional
 	Conditions []metav1.Condition `json:"conditions,omitempty" patchStrategy:"merge" patchMergeKey:"type"`
 }
 
-type Config struct {
-	Drivers      map[string]Values           `yaml:"drivers" json:"drivers"`
-	MessageBuses map[string]MessageBusConfig `yaml:"messageBuses" json:"messageBuses"`
-}
-
 type MessageBusConfig struct {
-	Enabled    bool   `yaml:"enabled" json:"enabled"`
-	Properties Values `yaml:"properties" json:"properties"`
+	Enabled        bool   `yaml:"enabled" json:"enabled"`
+	MessageBusType string `yaml:"type" json:"type"`
+	Properties     Values `yaml:"properties" json:"properties"`
 }

@@ -20,6 +20,10 @@ func (c *FakeEdgeV1alpha1) DeviceAddOnConfigs(namespace string) v1alpha1.DeviceA
 	return &FakeDeviceAddOnConfigs{c, namespace}
 }
 
+func (c *FakeEdgeV1alpha1) Drivers(namespace string) v1alpha1.DriverInterface {
+	return &FakeDrivers{c, namespace}
+}
+
 // RESTClient returns a RESTClient that is used to communicate
 // with API server by this client implementation.
 func (c *FakeEdgeV1alpha1) RESTClient() rest.Interface {

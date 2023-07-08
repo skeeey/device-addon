@@ -12,6 +12,8 @@ type Interface interface {
 	Devices() DeviceInformer
 	// DeviceAddOnConfigs returns a DeviceAddOnConfigInformer.
 	DeviceAddOnConfigs() DeviceAddOnConfigInformer
+	// Drivers returns a DriverInformer.
+	Drivers() DriverInformer
 }
 
 type version struct {
@@ -33,4 +35,9 @@ func (v *version) Devices() DeviceInformer {
 // DeviceAddOnConfigs returns a DeviceAddOnConfigInformer.
 func (v *version) DeviceAddOnConfigs() DeviceAddOnConfigInformer {
 	return &deviceAddOnConfigInformer{factory: v.factory, namespace: v.namespace, tweakListOptions: v.tweakListOptions}
+}
+
+// Drivers returns a DriverInformer.
+func (v *version) Drivers() DriverInformer {
+	return &driverInformer{factory: v.factory, namespace: v.namespace, tweakListOptions: v.tweakListOptions}
 }

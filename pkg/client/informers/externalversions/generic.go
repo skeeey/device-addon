@@ -41,6 +41,8 @@ func (f *sharedInformerFactory) ForResource(resource schema.GroupVersionResource
 		return &genericInformer{resource: resource.GroupResource(), informer: f.Edge().V1alpha1().Devices().Informer()}, nil
 	case v1alpha1.SchemeGroupVersion.WithResource("deviceaddonconfigs"):
 		return &genericInformer{resource: resource.GroupResource(), informer: f.Edge().V1alpha1().DeviceAddOnConfigs().Informer()}, nil
+	case v1alpha1.SchemeGroupVersion.WithResource("drivers"):
+		return &genericInformer{resource: resource.GroupResource(), informer: f.Edge().V1alpha1().Drivers().Informer()}, nil
 
 	}
 

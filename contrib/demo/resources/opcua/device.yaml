@@ -1,0 +1,34 @@
+apiVersion: edge.open-cluster-management.io/v1alpha1
+kind: Device
+metadata:
+  name: opcua-s001
+spec:
+  name: "opcua-s001"
+  driverType: "opcua"
+  manufacturer: "Prosys"
+  model: "S1"
+  description: "OPCUA device is created for test purpose"
+  protocolProperties:
+      endpoint: "opc.tcp://127.0.0.1:53530/OPCUA/SimulationServer"
+  profile:
+    deviceResources:
+    - name: "counter"
+      description: "generated counter number"
+      properties:
+        valueType: "Int32"
+        readWrite: "R"
+        defaultValue: "0"
+        minimum: 0
+        maximum: 30
+      attributes:
+        nodeId: "ns=3;i=1002"
+    - name: "random"
+      description: "generated random number"
+      properties:
+        valueType: "Float64"
+        readWrite: "R"
+        defaultValue: "0.0"
+        minimum: -2.0
+        maximum: 2.0
+      attributes:
+        nodeId: "ns=3;i=1003"

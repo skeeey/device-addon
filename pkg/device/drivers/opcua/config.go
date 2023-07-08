@@ -1,7 +1,6 @@
 package opcua
 
 const (
-	Protocol = "opcua"
 	Endpoint = "endpoint"
 )
 

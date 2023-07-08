@@ -5,3 +5,5 @@ package v1alpha1
 type DeviceExpansion interface{}
 
 type DeviceAddOnConfigExpansion interface{}
+
+type DriverExpansion interface{}

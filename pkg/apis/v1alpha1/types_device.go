@@ -47,56 +47,127 @@ type DeviceStatus struct {
 type ReadWrite string
 
 type DeviceConfig struct {
-	Name         string            `yaml:"name" json:"name"`
-	DriverType   string            `yaml:"driverType" json:"driverType"`
-	Manufacturer string            `yaml:"manufacturer" json:"manufacturer"`
-	Model        string            `yaml:"model" json:"model"`
-	Description  string            `yaml:"description,omitempty" json:"description,omitempty"`
-	Protocols    map[string]Values `yaml:"protocols" json:"protocols"`
-	Properties   Values            `yaml:"properties,omitempty" json:"properties,omitempty"`
-	Profile      DeviceProfile     `yaml:"profile" json:"profile"`
+	// Name represents the device name
+	// +required
+	Name string `yaml:"name" json:"name"`
+
+	// DriverType represents the device driver type
+	// +required
+	DriverType string `yaml:"driverType" json:"driverType"`
+
+	// Manufacturer represents the device manufacturer
+	// +optional
+	Manufacturer string `yaml:"manufacturer,omitempty" json:"manufacturer,omitempty"`
+
+	// Model represents the device model
+	// +optional
+	Model string `yaml:"model,omitempty" json:"model,omitempty"`
+
+	// Description describe the device ifnromation
+	// +optional
+	Description string `yaml:"description,omitempty" json:"description,omitempty"`
+
+	// ProtocolProperties represents device protocol properties
+	// +optional
+	// +kubebuilder:validation:XPreserveUnknownFields
+	ProtocolProperties Values `yaml:"protocolProperties,omitempty" json:"protocolProperties,omitempty"`
+
+	// Profile represents the device data profile
+	// +required
+	Profile DeviceProfile `yaml:"profile" json:"profile"`
 }
 
 type DeviceProfile struct {
+	// DeviceResources represents device supporting resources
+	// +optional
 	DeviceResources []DeviceResource `yaml:"deviceResources" json:"deviceResources"`
-	DeviceCommands  []DeviceCommand  `yaml:"deviceCommands" json:"deviceCommands"`
-}
 
-type DeviceProfileList struct {
-	Profiles []DeviceProfile `yaml:"profiles" json:"profiles"`
+	//DeviceCommands []DeviceCommand `yaml:"deviceCommands" json:"deviceCommands"`
 }
 
 type ResourceProperties struct {
-	ValueType    string    `yaml:"valueType" json:"valueType"`
-	ReadWrite    ReadWrite `yaml:"readWrite" json:"readWrite"`
-	Units        string    `yaml:"units" json:"units"`
-	Minimum      *float64  `yaml:"minimum" json:"minimum"`
-	Maximum      *float64  `yaml:"maximum" json:"maximum"`
-	DefaultValue string    `yaml:"defaultValue" json:"defaultValue"`
-	Mask         *uint64   `yaml:"mask" json:"mask"`
-	Shift        *int64    `yaml:"shift" json:"shift"`
-	Scale        *float64  `yaml:"scale" json:"scale"`
-	Offset       *float64  `yaml:"offset" json:"offset"`
-	Base         *float64  `yaml:"base" json:"base"`
-	Assertion    string    `yaml:"assertion" json:"assertion"`
-	MediaType    string    `yaml:"mediaType" json:"mediaType"`
-	Optional     Values    `yaml:"optional" json:"optional"`
+	// ReadWrite
+	ReadWrite ReadWrite `yaml:"readWrite" json:"readWrite"`
+
+	// ValueType
+	ValueType string `yaml:"valueType" json:"valueType"`
+
+	// Units
+	// +optional
+	Units string `yaml:"units,omitempty" json:"units,omitempty"`
+
+	// DefaultValue
+	// +optional
+	DefaultValue string `yaml:"defaultValue,omitempty" json:"defaultValue,omitempty"`
+
+	// Minimum
+	// +optional
+	Assertion string `yaml:"assertion,omitempty" json:"assertion,omitempty"`
+
+	// Minimum
+	// +optional
+	MediaType string `yaml:"mediaType,omitempty" json:"mediaType,omitempty"`
+
+	// Minimum
+	// +optional
+	Minimum *float64 `yaml:"minimum,omitempty" json:"minimum,omitempty"`
+
+	// Maximum
+	// +optional
+	Maximum *float64 `yaml:"maximum,omitempty" json:"maximum,omitempty"`
+
+	// Mask
+	// +optional
+	Mask *uint64 `yaml:"mask,omitempty" json:"mask,omitempty"`
+
+	// Shift
+	// +optional
+	Shift *int64 `yaml:"shift,omitempty" json:"shift,omitempty"`
+
+	// Scale
+	// +optional
+	Scale *float64 `yaml:"scale,omitempty" json:"scale,omitempty"`
+
+	// Offset
+	// +optional
+	Offset *float64 `yaml:"offset,omitempty" json:"offset,omitempty"`
+
+	// Base
+	// +optional
+	Base *float64 `yaml:"base,omitempty" json:"base,omitempty"`
+
+	// Optional
+	// +optional
+	// +kubebuilder:validation:XPreserveUnknownFields
+	Optional Values `yaml:"optional,omitempty" json:"optional,omitempty"`
 }
 
 type DeviceResource struct {
-	Name        string             `yaml:"name" json:"name"`
-	Description string             `yaml:"description" json:"description"`
-	Properties  ResourceProperties `yaml:"properties" json:"properties"`
-	Attributes  Values             `yaml:"attributes" json:"attributes"`
+	// Name represents the device resoruce name
+	// +required
+	Name string `yaml:"name" json:"name"`
+
+	// Description represents the device resoruce description
+	// +optional
+	Description string `yaml:"description,omitempty" json:"description,omitempty"`
+
+	// Name represents the device resoruce properties
+	// +required
+	Properties ResourceProperties `yaml:"properties" json:"properties"`
+
+	// Attributes represents the device resoruce attributes
+	// +optional
+	// +kubebuilder:validation:XPreserveUnknownFields
+	Attributes Values `yaml:"attributes,omitempty" json:"attributes,omitempty"`
 }
 
-type DeviceCommand struct {
-	Name      string                  `yaml:"name" json:"name"`
-	ReadWrite ReadWrite               `yaml:"readWrite" json:"readWrite"`
-	Resources []DeviceCommandResource `yaml:"resources" json:"resources"`
-}
+// type DeviceCommand struct {
+// 	Name      string                  `yaml:"name" json:"name"`
+// 	ReadWrite ReadWrite               `yaml:"readWrite" json:"readWrite"`
+// 	Resources []DeviceCommandResource `yaml:"resources" json:"resources"`
+// }
 
-type DeviceCommandResource struct {
-	DeviceResource string `yaml:"deviceResource" json:"deviceResource"`
-	DefaultValue   string `yaml:"defaultValue" json:"defaultValue"`
-}
+// type DeviceCommandResource struct {
+// 	DeviceResource string `yaml:"deviceResource" json:"deviceResource"`
+// 	DefaultValue   string `yaml:"defaultValue" json:"defaultValue"`
+// }

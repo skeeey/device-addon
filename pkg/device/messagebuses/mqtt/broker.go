@@ -18,7 +18,7 @@ import (
 )
 
 const (
-	publishTopic  = "publishTopic"
+	publishTopic  = "receiveTopic"
 	payloadFormat = "payloadFormat"
 )
 
@@ -36,10 +36,10 @@ type MQTTMsgBus struct {
 	payload    palyloadFunc
 }
 
-func NewMQTTMsgBus() *MQTTMsgBus {
+func NewMQTTMsgBus(config v1alpha1.MessageBusConfig) *MQTTMsgBus {
 	opts := paho.NewClientOptions()
 	opts.AddBroker("tcp://127.0.0.1:1883")
-	opts.SetClientID("mqtt-msgbus")
+	opts.SetClientID("msgbus-mqtt-client")
 	opts.SetKeepAlive(time.Second * time.Duration(3600))
 	opts.SetAutoReconnect(true)
 
@@ -50,23 +50,22 @@ func NewMQTTMsgBus() *MQTTMsgBus {
 	// Allow all connections.
 	_ = server.AddHook(new(auth.AllowHook), nil)
 
-	return &MQTTMsgBus{
+	ptopic, ok := config.Properties.Data[publishTopic]
+	if !ok {
+		klog.Infof("Using %s as the default publish topic devices/+/data/+", ptopic)
+		ptopic = "devices/%s/data/%s"
+	}
+
+	format, ok := config.Properties.Data[payloadFormat]
+	if !ok {
+		klog.Infof("Using %s as the default payload format", jsonMap)
+		format = jsonMap
+	}
+
+	m := &MQTTMsgBus{
 		mqttBroker: server,
 		mqttClient: paho.NewClient(opts),
-	}
-}
-
-func (m *MQTTMsgBus) Init(msgBusInfo v1alpha1.MessageBusConfig) error {
-	ptopic, ok := msgBusInfo.Properties.Data[publishTopic]
-	if !ok {
-		return fmt.Errorf("the publishTopic is required for mqtt message bus")
-	}
-
-	m.pubTopic = fmt.Sprintf("%s", ptopic)
-
-	format, ok := msgBusInfo.Properties.Data[payloadFormat]
-	if !ok {
-		return nil
+		pubTopic:   fmt.Sprintf("%s", ptopic),
 	}
 
 	format = fmt.Sprintf("%s", format)
@@ -75,14 +74,12 @@ func (m *MQTTMsgBus) Init(msgBusInfo v1alpha1.MessageBusConfig) error {
 		m.payload = toJsonObj
 	case jsonMap:
 		m.payload = toJsonMap
-	default:
-		return fmt.Errorf("unsupported payload formt for mqtt message bus")
 	}
-	return nil
+
+	return m
 }
 
-func (m *MQTTMsgBus) Connect() error {
-	//TODO need a embedded flag
+func (m *MQTTMsgBus) Start() error {
 	go func() {
 		tcp := listeners.NewTCP("mqttmsgbus", ":1883", nil)
 		if err := m.mqttBroker.AddListener(tcp); err != nil {
@@ -93,7 +90,7 @@ func (m *MQTTMsgBus) Connect() error {
 			klog.Fatal(err)
 		}
 
-		klog.Infof("The MQTT message bus is started on the local host")
+		klog.Infof("MQTT message bus is started on the localhost")
 	}()
 
 	// TODO need a notify mechanism
@@ -104,20 +101,22 @@ func (m *MQTTMsgBus) Connect() error {
 		return token.Error()
 	}
 
-	klog.Infof("Connect MQTT message bus")
+	klog.Infof("Connect to localhost MQTT message bus")
 	return nil
 }
 
-func (m *MQTTMsgBus) Publish(deviceName string, result util.Result) {
+func (m *MQTTMsgBus) ReceiveData(deviceName string, result util.Result) error {
 	topic := fmt.Sprintf(m.pubTopic, deviceName, result.Name)
 	data := m.payload(result)
 
-	klog.V(4).Infof("publish the data %s to %s for device %s", string(data), topic, deviceName)
+	klog.Infof("Send data to MQTT message bus, [%s] [%s] %s", topic, deviceName, string(data))
 	m.mqttClient.Publish(topic, 0, false, data)
+	return nil
 }
 
-func (m *MQTTMsgBus) Subscribe() {
-	// TODO subscribe message from message bus and send the message to driver
+func (m *MQTTMsgBus) SendData() error {
+	// TODO subscribe to message bus to get the command to send the command to driver
+	return nil
 }
 
 func (m *MQTTMsgBus) Stop() {

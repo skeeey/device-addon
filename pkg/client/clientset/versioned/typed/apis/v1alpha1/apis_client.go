@@ -14,6 +14,7 @@ type EdgeV1alpha1Interface interface {
 	RESTClient() rest.Interface
 	DevicesGetter
 	DeviceAddOnConfigsGetter
+	DriversGetter
 }
 
 // EdgeV1alpha1Client is used to interact with features provided by the edge.open-cluster-management.io group.
@@ -27,6 +28,10 @@ func (c *EdgeV1alpha1Client) Devices(namespace string) DeviceInterface {
 
 func (c *EdgeV1alpha1Client) DeviceAddOnConfigs(namespace string) DeviceAddOnConfigInterface {
 	return newDeviceAddOnConfigs(c, namespace)
+}
+
+func (c *EdgeV1alpha1Client) Drivers(namespace string) DriverInterface {
+	return newDrivers(c, namespace)
 }
 
 // NewForConfig creates a new EdgeV1alpha1Client for the given config.

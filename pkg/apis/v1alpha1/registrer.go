@@ -31,10 +31,14 @@ func Resource(resource string) schema.GroupResource {
 
 // Adds the list of known types to api.Scheme.
 func addKnownTypes(scheme *runtime.Scheme) error {
-	// scheme.AddKnownTypes(GroupVersion,
-	// 	&Device{},
-	// 	&DeviceList{},
-	// )
+	scheme.AddKnownTypes(GroupVersion,
+		&DeviceAddOnConfig{},
+		&DeviceAddOnConfigList{},
+		&Driver{},
+		&DriverList{},
+		&Device{},
+		&DeviceList{},
+	)
 	metav1.AddToGroupVersion(scheme, GroupVersion)
 	return nil
 }

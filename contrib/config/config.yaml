@@ -1,20 +1,6 @@
-drivers:
-  opcua:
-    securityPolicy: "None"
-    securityMode: "None"
-    certFile: ""
-    keyFile: ""
-  # mqtt:
-  #   host: "localhost:1883"
-  #   qos: 0
-  #   keepAlive: 3600
-  #   clientId: "device-mqtt"
-  #   connEstablishingRetry: 10
-  #   authMode: "none"
-  #   subTopic: "sub/data/#"  # device broker sub topic, we use this topic to get data from device
 messageBuses:
-  mqtt:
-    enabled: true
-    properties:
-      publishTopic: "/ocm/devices/%s/data/%s" # /ocm/devices/<device name>/data/<data name>
-      payloadFormat: "jsonMap" # jsonObj or jsonMap
+- type: "mqtt"
+  enabled: true
+  properties:
+    receiveTopic: "devices/%s/data/%s" # message bus use this topic to receive data from driver
+    payloadFormat: "jsonMap" # jsonObj or jsonMap

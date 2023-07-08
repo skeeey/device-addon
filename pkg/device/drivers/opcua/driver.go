@@ -9,6 +9,7 @@ import (
 	"github.com/gopcua/opcua"
 	"github.com/gopcua/opcua/ua"
 
+	"k8s.io/apimachinery/pkg/api/equality"
 	"k8s.io/klog/v2"
 
 	"github.com/skeeey/device-addon/pkg/apis/v1alpha1"
@@ -22,32 +23,31 @@ type request struct {
 	res    v1alpha1.DeviceResource
 }
 
+type opcuaDevice struct {
+	config     v1alpha1.DeviceConfig
+	requests   []request
+	cancelFunc context.CancelFunc
+}
+
 type OPCUADriver struct {
 	sync.Mutex
-	serverInfo       *OPCUAServerInfo
-	msgBuses         []messagebuses.MessageBus
-	devices          map[string]v1alpha1.DeviceConfig
-	deviceRequests   map[string][]request
-	deviceSubCancels map[string]context.CancelFunc
+	serverInfo *OPCUAServerInfo
+	msgBuses   []messagebuses.MessageBus
+	devices    map[string]opcuaDevice
 }
 
-func NewOPCUADriver() *OPCUADriver {
-	return &OPCUADriver{
-		devices:          make(map[string]v1alpha1.DeviceConfig),
-		deviceRequests:   make(map[string][]request),
-		deviceSubCancels: make(map[string]context.CancelFunc),
-	}
-}
-
-func (d *OPCUADriver) Initialize(driverConfig util.ConfigProperties, msgBuses []messagebuses.MessageBus) error {
+func NewOPCUADriver(driverConfig util.ConfigProperties, msgBuses []messagebuses.MessageBus) *OPCUADriver {
 	var serverInfo = &OPCUAServerInfo{}
 	if err := util.ToConfigObj(driverConfig, serverInfo); err != nil {
-		return err
+		klog.Errorf("failed to parse opcua drirver config %v", err)
+		return nil
 	}
 
-	d.msgBuses = msgBuses
-	d.serverInfo = serverInfo
-	return nil
+	return &OPCUADriver{
+		devices:    make(map[string]opcuaDevice),
+		msgBuses:   msgBuses,
+		serverInfo: serverInfo,
+	}
 }
 
 func (d *OPCUADriver) GetType() string {
@@ -59,55 +59,76 @@ func (d *OPCUADriver) Start() error {
 	return nil
 }
 
-func (d *OPCUADriver) Stop() error {
-	return nil
-}
-
-func (d *OPCUADriver) AddDevice(device v1alpha1.DeviceConfig) error {
+func (d *OPCUADriver) Stop() {
 	d.Lock()
 	defer d.Unlock()
 
-	_, ok := d.devices[device.Name]
-	if !ok {
-		go func() {
-			if err := d.startSubscription(device); err != nil {
-				klog.Errorf("failed to sub device %s, %v", device.Name, err)
-			}
-		}()
-
-		d.devices[device.Name] = device
+	for _, device := range d.devices {
+		device.cancelFunc()
 	}
-
-	return nil
 }
 
-func (d *OPCUADriver) UpdateDevice(device v1alpha1.DeviceConfig) error {
-	//TODO
+func (d *OPCUADriver) AddDevice(config v1alpha1.DeviceConfig) error {
+	d.Lock()
+	defer d.Unlock()
+
+	requests := []request{}
+
+	last, ok := d.devices[config.Name]
+	if ok {
+		if equality.Semantic.DeepEqual(last.config, config) {
+			klog.Infof("The device %s already exists", config.Name)
+			return nil
+		}
+
+		klog.Infof("Restart the device %s", config.Name)
+		requests = append(requests, last.requests...)
+		last.cancelFunc()
+	}
+
+	ctx, cancel := context.WithCancel(context.Background())
+
+	go func() {
+		klog.Infof("Start device %s", config.Name)
+		if err := d.startSubscription(ctx, config); err != nil {
+			klog.Errorf("failed to start device %s, %v", config.Name, err)
+			cancel()
+		}
+		klog.Infof("The device %s is done", config.Name)
+	}()
+
+	klog.Infof("The device %s is starting", config.Name)
+	d.devices[config.Name] = opcuaDevice{
+		config:     config,
+		requests:   requests,
+		cancelFunc: cancel,
+	}
 	return nil
 }
 
 func (d *OPCUADriver) RemoveDevice(deviceName string) error {
-	//TODO
-	return nil
-}
+	d.Lock()
+	defer d.Unlock()
 
-func (d *OPCUADriver) HandleCommands(deviceName string, command util.Command) error {
-	//TODO
-	return nil
-}
-
-func (d *OPCUADriver) startSubscription(device v1alpha1.DeviceConfig) error {
-	_, ok := d.deviceSubCancels[device.Name]
-	if ok {
+	current, ok := d.devices[deviceName]
+	if !ok {
+		klog.Infof("The device %s is removed", deviceName)
 		return nil
 	}
 
-	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
+	klog.Infof("Remove the device %s", deviceName)
+	current.cancelFunc()
+	delete(d.devices, deviceName)
+	return nil
+}
 
-	d.deviceSubCancels[device.Name] = cancel
+func (d *OPCUADriver) RunCommand(command util.Command) error {
+	//TODO
+	return nil
+}
 
-	endpoint, err := d.findEndpoint(device)
+func (d *OPCUADriver) startSubscription(ctx context.Context, config v1alpha1.DeviceConfig) error {
+	endpoint, err := d.findEndpoint(config)
 	if err != nil {
 		return err
 	}
@@ -143,10 +164,8 @@ func (d *OPCUADriver) startSubscription(device v1alpha1.DeviceConfig) error {
 	klog.Infof("Connected to opcua server %s", endpoint)
 
 	notifyCh := make(chan *opcua.PublishNotificationData)
-
-	sub, err := client.SubscribeWithContext(ctx, &opcua.SubscriptionParameters{
-		Interval: time.Duration(500) * time.Millisecond,
-	}, notifyCh)
+	interval := time.Duration(500) * time.Millisecond
+	sub, err := client.SubscribeWithContext(ctx, &opcua.SubscriptionParameters{Interval: interval}, notifyCh)
 	if err != nil {
 		return err
 	}
@@ -154,8 +173,8 @@ func (d *OPCUADriver) startSubscription(device v1alpha1.DeviceConfig) error {
 
 	klog.Infof("Created subscription with id %v", sub.SubscriptionID)
 
-	for index, deviceResource := range device.Profile.DeviceResources {
-		req, err := d.toRequest(device.Name, index, deviceResource)
+	for index, deviceResource := range config.Profile.DeviceResources {
+		req, err := d.toRequest(config.Name, index, deviceResource)
 		if err != nil {
 			return err
 		}
@@ -183,19 +202,19 @@ func (d *OPCUADriver) startSubscription(device v1alpha1.DeviceConfig) error {
 					data := item.Value.Value.Value()
 					klog.Infof("MonitoredItem with client handle %v = %v", item.ClientHandle, data)
 
-					req := d.findRequest(device.Name, item.ClientHandle)
+					req := d.findRequest(config.Name, item.ClientHandle)
 					if req == nil {
 						continue
 					}
 
 					result, err := util.NewResult(req.res, data)
 					if err != nil {
-						klog.Errorf("The device %s attribute %s  is unsupported, %v", device.Name, req.res.Name, err)
+						klog.Errorf("The device %s attribute %s  is unsupported, %v", config.Name, req.res.Name, err)
 						continue
 					}
 
 					for _, msgBus := range d.msgBuses {
-						msgBus.Publish(device.Name, *result)
+						msgBus.ReceiveData(config.Name, *result)
 					}
 				}
 
@@ -208,16 +227,11 @@ func (d *OPCUADriver) startSubscription(device v1alpha1.DeviceConfig) error {
 	}
 }
 
-func (d *OPCUADriver) findEndpoint(device v1alpha1.DeviceConfig) (string, error) {
-	protocols := device.Protocols
-	properties, ok := protocols[Protocol]
+func (d *OPCUADriver) findEndpoint(config v1alpha1.DeviceConfig) (string, error) {
+	protocolProperties := config.ProtocolProperties
+	endpoint, ok := protocolProperties.Data[Endpoint]
 	if !ok {
-		return "", fmt.Errorf("opcua protocol properties is not defined")
-	}
-
-	endpoint, ok := properties.Data[Endpoint]
-	if !ok {
-		return "", fmt.Errorf("endpoint not found in the opcua protocol properties")
+		return "", fmt.Errorf("endpoint not found in the opcua protocol properties, %v", protocolProperties.Data)
 	}
 	return fmt.Sprintf("%v", endpoint), nil
 }
@@ -239,24 +253,23 @@ func (d *OPCUADriver) toRequest(deviceName string, index int, res v1alpha1.Devic
 		res:    res,
 	}
 
-	requests, ok := d.deviceRequests[deviceName]
+	device, ok := d.devices[deviceName]
 	if !ok {
-		d.deviceRequests[deviceName] = []request{req}
-		return &req, nil
+		return nil, fmt.Errorf("the device %s is not added", deviceName)
 	}
 
-	requests = append(requests, req)
-	d.deviceRequests[deviceName] = requests
+	device.requests = append(device.requests, req)
+	d.devices[deviceName] = device
 	return &req, nil
 }
 
 func (d *OPCUADriver) findRequest(deviceName string, handle uint32) *request {
-	requests, ok := d.deviceRequests[deviceName]
+	device, ok := d.devices[deviceName]
 	if !ok {
 		return nil
 	}
 
-	for _, req := range requests {
+	for _, req := range device.requests {
 		if req.handle == handle {
 			return &req
 		}

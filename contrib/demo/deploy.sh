@@ -20,10 +20,6 @@ kind delete clusters ${hub} ${spoke}
 kind create cluster --name=${hub}
 kind create cluster --name=${spoke}
 
-echo "##### Prepare mqtt broker..."
-kind load docker-image eclipse-mosquitto:2.0 --name ${spoke}
-kubectl --context kind-${spoke} apply -k ${mosquitto_deploy_path}
-
 echo "##### Clone multicluster-controlplane"
 mkdir -p ${REPO_DIR}/_output/multicluster-controlplane
 git clone --depth=1 https://github.com/open-cluster-management-io/multicluster-controlplane.git $REPO_DIR/_output/multicluster-controlplane

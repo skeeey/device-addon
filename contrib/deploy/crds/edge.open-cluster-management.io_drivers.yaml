@@ -4,20 +4,20 @@ kind: CustomResourceDefinition
 metadata:
   annotations:
     controller-gen.kubebuilder.io/version: v0.12.0
-  name: devices.edge.open-cluster-management.io
+  name: drivers.edge.open-cluster-management.io
 spec:
   group: edge.open-cluster-management.io
   names:
-    kind: Device
-    listKind: DeviceList
-    plural: devices
-    singular: device
+    kind: Driver
+    listKind: DriverList
+    plural: drivers
+    singular: driver
   scope: Namespaced
   versions:
   - name: v1alpha1
     schema:
       openAPIV3Schema:
-        description: Device is the Schema for the devices API
+        description: Driver is the schema for the device driver configuration API
         properties:
           apiVersion:
             description: 'APIVersion defines the versioned schema of this representation
@@ -32,103 +32,21 @@ spec:
           metadata:
             type: object
           spec:
-            description: spec holds the information about a device.
+            description: spec holds the configuration about a device driver configuration.
             properties:
-              description:
-                description: Description describe the device ifnromation
-                type: string
-              driverType:
-                description: DriverType represents the device driver type
-                type: string
-              manufacturer:
-                description: Manufacturer represents the device manufacturer
-                type: string
-              model:
-                description: Model represents the device model
-                type: string
-              name:
-                description: Name represents the device name
-                type: string
-              profile:
-                description: Profile represents the device data profile
-                properties:
-                  deviceResources:
-                    description: DeviceResources represents device supporting resources
-                    items:
-                      properties:
-                        attributes:
-                          description: Attributes represents the device resoruce attributes
-                          type: object
-                          x-kubernetes-preserve-unknown-fields: true
-                        description:
-                          description: Description represents the device resoruce
-                            description
-                          type: string
-                        name:
-                          description: Name represents the device resoruce name
-                          type: string
-                        properties:
-                          description: Name represents the device resoruce properties
-                          properties:
-                            assertion:
-                              description: Minimum
-                              type: string
-                            base:
-                              description: Base
-                              type: number
-                            defaultValue:
-                              description: DefaultValue
-                              type: string
-                            mask:
-                              description: Mask
-                              format: int64
-                              type: integer
-                            maximum:
-                              description: Maximum
-                              type: number
-                            mediaType:
-                              description: Minimum
-                              type: string
-                            minimum:
-                              description: Minimum
-                              type: number
-                            offset:
-                              description: Offset
-                              type: number
-                            optional:
-                              description: Optional
-                              type: object
-                              x-kubernetes-preserve-unknown-fields: true
-                            readWrite:
-                              description: ReadWrite
-                              type: string
-                            scale:
-                              description: Scale
-                              type: number
-                            shift:
-                              description: Shift
-                              format: int64
-                              type: integer
-                            units:
-                              description: Units
-                              type: string
-                            valueType:
-                              description: ValueType
-                              type: string
-                          type: object
-                      type: object
-                    type: array
-                type: object
-              protocolProperties:
-                description: ProtocolProperties represents device protocol properties
+              properties:
+                description: Properties represents device driver properties
                 type: object
                 x-kubernetes-preserve-unknown-fields: true
+              type:
+                description: DriverType represents device driver type
+                type: string
             type: object
           status:
-            description: status holds the state of a device.
+            description: status holds the state of this configuration.
             properties:
               conditions:
-                description: conditions describe the state of the current device.
+                description: conditions describe the state of the current device driver.
                 items:
                   description: "Condition contains details for one aspect of the current
                     state of this API Resource. --- This struct is intended for direct

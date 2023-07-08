@@ -31,14 +31,6 @@ image-push: image
 deploy:
 	contrib/demo/deploy.sh
 
-.PHONY: run-thermometer-a
-run-thermometer-a:
-	contrib/demo/run-device.sh room-a
-
-.PHONY: run-thermometer-b
-run-thermometer-b:
-	contrib/demo/run-device.sh room-b
-
 .PHONY: demo
 demo:
 	contrib/demo/demo.sh

@@ -92,7 +92,7 @@
       }
     },
     {
-      "topicFilter": "/ocm/devices/+/data/counter",
+      "topicFilter": "devices/+/data/counter",
       "converter": {
         "type": "json",
         "deviceNameTopicExpression": "(?<=devices\/)(.*?)(?=\/data)",
@@ -108,7 +108,7 @@
       }
     },
     {
-      "topicFilter": "/ocm/devices/+/data/random",
+      "topicFilter": "devices/+/data/random",
       "converter": {
         "type": "json",
         "deviceNameTopicExpression": "(?<=devices\/)(.*?)(?=\/data)",

@@ -6,36 +6,26 @@ import (
 	"github.com/skeeey/device-addon/pkg/apis/v1alpha1"
 	"github.com/skeeey/device-addon/pkg/device/messagebuses/mqtt"
 	"github.com/skeeey/device-addon/pkg/device/util"
+	"k8s.io/klog/v2"
 )
 
 type MessageBus interface {
-	Init(msgBusInfo v1alpha1.MessageBusConfig) error
-	Connect() error
-	Publish(deviceName string, result util.Result)
-	Subscribe()
+	Start() error
 	Stop()
+	ReceiveData(deviceName string, result util.Result) error
+	SendData() error
 }
 
-func Get(msgBusType string, msgBusInfo v1alpha1.MessageBusConfig) (MessageBus, error) {
-	switch msgBusType {
+func Get(conifg v1alpha1.MessageBusConfig) (MessageBus, error) {
+	switch conifg.MessageBusType {
 	case "mqtt":
-		if !msgBusInfo.Enabled {
-			return nil, nil
+		if conifg.Enabled {
+			return mqtt.NewMQTTMsgBus(conifg), nil
 		}
-
-		mqttMsgBus := mqtt.NewMQTTMsgBus()
-
-		if err := mqttMsgBus.Init(msgBusInfo); err != nil {
-			return nil, err
-		}
-
-		if err := mqttMsgBus.Connect(); err != nil {
-			return nil, err
-		}
-
-		return mqttMsgBus, nil
+	default:
+		return nil, fmt.Errorf("unsupported message bus type %s", conifg.MessageBusType)
 	}
 
-	return nil, fmt.Errorf("unsupported message bus type %s", msgBusType)
-
+	klog.Warningf("Thers is no message bus is found")
+	return nil, nil
 }

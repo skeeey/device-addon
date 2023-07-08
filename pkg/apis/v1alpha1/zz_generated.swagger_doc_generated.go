@@ -16,21 +16,22 @@ import (
 
 func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenAPIDefinition {
 	return map[string]common.OpenAPIDefinition{
-		"github.com/skeeey/device-addon/pkg/apis/v1alpha1.Config":                      schema_device_addon_pkg_apis_v1alpha1_Config(ref),
 		"github.com/skeeey/device-addon/pkg/apis/v1alpha1.Device":                      schema_device_addon_pkg_apis_v1alpha1_Device(ref),
 		"github.com/skeeey/device-addon/pkg/apis/v1alpha1.DeviceAddOnConfig":           schema_device_addon_pkg_apis_v1alpha1_DeviceAddOnConfig(ref),
 		"github.com/skeeey/device-addon/pkg/apis/v1alpha1.DeviceAddOnConfigList":       schema_device_addon_pkg_apis_v1alpha1_DeviceAddOnConfigList(ref),
 		"github.com/skeeey/device-addon/pkg/apis/v1alpha1.DeviceAddOnConfigSpec":       schema_device_addon_pkg_apis_v1alpha1_DeviceAddOnConfigSpec(ref),
 		"github.com/skeeey/device-addon/pkg/apis/v1alpha1.DeviceAddOnConfigSpecStatus": schema_device_addon_pkg_apis_v1alpha1_DeviceAddOnConfigSpecStatus(ref),
-		"github.com/skeeey/device-addon/pkg/apis/v1alpha1.DeviceCommand":               schema_device_addon_pkg_apis_v1alpha1_DeviceCommand(ref),
-		"github.com/skeeey/device-addon/pkg/apis/v1alpha1.DeviceCommandResource":       schema_device_addon_pkg_apis_v1alpha1_DeviceCommandResource(ref),
 		"github.com/skeeey/device-addon/pkg/apis/v1alpha1.DeviceConfig":                schema_device_addon_pkg_apis_v1alpha1_DeviceConfig(ref),
 		"github.com/skeeey/device-addon/pkg/apis/v1alpha1.DeviceList":                  schema_device_addon_pkg_apis_v1alpha1_DeviceList(ref),
 		"github.com/skeeey/device-addon/pkg/apis/v1alpha1.DeviceProfile":               schema_device_addon_pkg_apis_v1alpha1_DeviceProfile(ref),
-		"github.com/skeeey/device-addon/pkg/apis/v1alpha1.DeviceProfileList":           schema_device_addon_pkg_apis_v1alpha1_DeviceProfileList(ref),
 		"github.com/skeeey/device-addon/pkg/apis/v1alpha1.DeviceResource":              schema_device_addon_pkg_apis_v1alpha1_DeviceResource(ref),
 		"github.com/skeeey/device-addon/pkg/apis/v1alpha1.DeviceSpec":                  schema_device_addon_pkg_apis_v1alpha1_DeviceSpec(ref),
 		"github.com/skeeey/device-addon/pkg/apis/v1alpha1.DeviceStatus":                schema_device_addon_pkg_apis_v1alpha1_DeviceStatus(ref),
+		"github.com/skeeey/device-addon/pkg/apis/v1alpha1.Driver":                      schema_device_addon_pkg_apis_v1alpha1_Driver(ref),
+		"github.com/skeeey/device-addon/pkg/apis/v1alpha1.DriverConfig":                schema_device_addon_pkg_apis_v1alpha1_DriverConfig(ref),
+		"github.com/skeeey/device-addon/pkg/apis/v1alpha1.DriverList":                  schema_device_addon_pkg_apis_v1alpha1_DriverList(ref),
+		"github.com/skeeey/device-addon/pkg/apis/v1alpha1.DriverSpec":                  schema_device_addon_pkg_apis_v1alpha1_DriverSpec(ref),
+		"github.com/skeeey/device-addon/pkg/apis/v1alpha1.DriverStatus":                schema_device_addon_pkg_apis_v1alpha1_DriverStatus(ref),
 		"github.com/skeeey/device-addon/pkg/apis/v1alpha1.MessageBusConfig":            schema_device_addon_pkg_apis_v1alpha1_MessageBusConfig(ref),
 		"github.com/skeeey/device-addon/pkg/apis/v1alpha1.ResourceProperties":          schema_device_addon_pkg_apis_v1alpha1_ResourceProperties(ref),
 		"github.com/skeeey/device-addon/pkg/apis/v1alpha1.Values":                      schema_device_addon_pkg_apis_v1alpha1_Values(ref),
@@ -88,49 +89,6 @@ func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenA
 		"k8s.io/apimachinery/pkg/runtime.TypeMeta":                                     schema_k8sio_apimachinery_pkg_runtime_TypeMeta(ref),
 		"k8s.io/apimachinery/pkg/runtime.Unknown":                                      schema_k8sio_apimachinery_pkg_runtime_Unknown(ref),
 		"k8s.io/apimachinery/pkg/version.Info":                                         schema_k8sio_apimachinery_pkg_version_Info(ref),
-	}
-}
-
-func schema_device_addon_pkg_apis_v1alpha1_Config(ref common.ReferenceCallback) common.OpenAPIDefinition {
-	return common.OpenAPIDefinition{
-		Schema: spec.Schema{
-			SchemaProps: spec.SchemaProps{
-				Type: []string{"object"},
-				Properties: map[string]spec.Schema{
-					"drivers": {
-						SchemaProps: spec.SchemaProps{
-							Type: []string{"object"},
-							AdditionalProperties: &spec.SchemaOrBool{
-								Allows: true,
-								Schema: &spec.Schema{
-									SchemaProps: spec.SchemaProps{
-										Default: map[string]interface{}{},
-										Ref:     ref("github.com/skeeey/device-addon/pkg/apis/v1alpha1.Values"),
-									},
-								},
-							},
-						},
-					},
-					"messageBuses": {
-						SchemaProps: spec.SchemaProps{
-							Type: []string{"object"},
-							AdditionalProperties: &spec.SchemaOrBool{
-								Allows: true,
-								Schema: &spec.Schema{
-									SchemaProps: spec.SchemaProps{
-										Default: map[string]interface{}{},
-										Ref:     ref("github.com/skeeey/device-addon/pkg/apis/v1alpha1.MessageBusConfig"),
-									},
-								},
-							},
-						},
-					},
-				},
-				Required: []string{"drivers", "messageBuses"},
-			},
-		},
-		Dependencies: []string{
-			"github.com/skeeey/device-addon/pkg/apis/v1alpha1.MessageBusConfig", "github.com/skeeey/device-addon/pkg/apis/v1alpha1.Values"},
 	}
 }
 
@@ -289,25 +247,10 @@ func schema_device_addon_pkg_apis_v1alpha1_DeviceAddOnConfigSpec(ref common.Refe
 			SchemaProps: spec.SchemaProps{
 				Type: []string{"object"},
 				Properties: map[string]spec.Schema{
-					"drivers": {
-						SchemaProps: spec.SchemaProps{
-							Type: []string{"object"},
-							AdditionalProperties: &spec.SchemaOrBool{
-								Allows: true,
-								Schema: &spec.Schema{
-									SchemaProps: spec.SchemaProps{
-										Default: map[string]interface{}{},
-										Ref:     ref("github.com/skeeey/device-addon/pkg/apis/v1alpha1.Values"),
-									},
-								},
-							},
-						},
-					},
 					"messageBuses": {
 						SchemaProps: spec.SchemaProps{
-							Type: []string{"object"},
-							AdditionalProperties: &spec.SchemaOrBool{
-								Allows: true,
+							Type: []string{"array"},
+							Items: &spec.SchemaOrArray{
 								Schema: &spec.Schema{
 									SchemaProps: spec.SchemaProps{
 										Default: map[string]interface{}{},
@@ -318,11 +261,11 @@ func schema_device_addon_pkg_apis_v1alpha1_DeviceAddOnConfigSpec(ref common.Refe
 						},
 					},
 				},
-				Required: []string{"drivers", "messageBuses"},
+				Required: []string{"messageBuses"},
 			},
 		},
 		Dependencies: []string{
-			"github.com/skeeey/device-addon/pkg/apis/v1alpha1.MessageBusConfig", "github.com/skeeey/device-addon/pkg/apis/v1alpha1.Values"},
+			"github.com/skeeey/device-addon/pkg/apis/v1alpha1.MessageBusConfig"},
 	}
 }
 
@@ -340,7 +283,7 @@ func schema_device_addon_pkg_apis_v1alpha1_DeviceAddOnConfigSpecStatus(ref commo
 							},
 						},
 						SchemaProps: spec.SchemaProps{
-							Description: "conditions describe the state of the current device.",
+							Description: "conditions describe the state of the current configuration.",
 							Type:        []string{"array"},
 							Items: &spec.SchemaOrArray{
 								Schema: &spec.Schema{
@@ -360,75 +303,6 @@ func schema_device_addon_pkg_apis_v1alpha1_DeviceAddOnConfigSpecStatus(ref commo
 	}
 }
 
-func schema_device_addon_pkg_apis_v1alpha1_DeviceCommand(ref common.ReferenceCallback) common.OpenAPIDefinition {
-	return common.OpenAPIDefinition{
-		Schema: spec.Schema{
-			SchemaProps: spec.SchemaProps{
-				Type: []string{"object"},
-				Properties: map[string]spec.Schema{
-					"name": {
-						SchemaProps: spec.SchemaProps{
-							Default: "",
-							Type:    []string{"string"},
-							Format:  "",
-						},
-					},
-					"readWrite": {
-						SchemaProps: spec.SchemaProps{
-							Default: "",
-							Type:    []string{"string"},
-							Format:  "",
-						},
-					},
-					"resources": {
-						SchemaProps: spec.SchemaProps{
-							Type: []string{"array"},
-							Items: &spec.SchemaOrArray{
-								Schema: &spec.Schema{
-									SchemaProps: spec.SchemaProps{
-										Default: map[string]interface{}{},
-										Ref:     ref("github.com/skeeey/device-addon/pkg/apis/v1alpha1.DeviceCommandResource"),
-									},
-								},
-							},
-						},
-					},
-				},
-				Required: []string{"name", "readWrite", "resources"},
-			},
-		},
-		Dependencies: []string{
-			"github.com/skeeey/device-addon/pkg/apis/v1alpha1.DeviceCommandResource"},
-	}
-}
-
-func schema_device_addon_pkg_apis_v1alpha1_DeviceCommandResource(ref common.ReferenceCallback) common.OpenAPIDefinition {
-	return common.OpenAPIDefinition{
-		Schema: spec.Schema{
-			SchemaProps: spec.SchemaProps{
-				Type: []string{"object"},
-				Properties: map[string]spec.Schema{
-					"deviceResource": {
-						SchemaProps: spec.SchemaProps{
-							Default: "",
-							Type:    []string{"string"},
-							Format:  "",
-						},
-					},
-					"defaultValue": {
-						SchemaProps: spec.SchemaProps{
-							Default: "",
-							Type:    []string{"string"},
-							Format:  "",
-						},
-					},
-				},
-				Required: []string{"deviceResource", "defaultValue"},
-			},
-		},
-	}
-}
-
 func schema_device_addon_pkg_apis_v1alpha1_DeviceConfig(ref common.ReferenceCallback) common.OpenAPIDefinition {
 	return common.OpenAPIDefinition{
 		Schema: spec.Schema{
@@ -437,66 +311,57 @@ func schema_device_addon_pkg_apis_v1alpha1_DeviceConfig(ref common.ReferenceCall
 				Properties: map[string]spec.Schema{
 					"name": {
 						SchemaProps: spec.SchemaProps{
-							Default: "",
-							Type:    []string{"string"},
-							Format:  "",
+							Description: "Name represents the device name",
+							Default:     "",
+							Type:        []string{"string"},
+							Format:      "",
 						},
 					},
 					"driverType": {
 						SchemaProps: spec.SchemaProps{
-							Default: "",
-							Type:    []string{"string"},
-							Format:  "",
+							Description: "DriverType represents the device driver type",
+							Default:     "",
+							Type:        []string{"string"},
+							Format:      "",
 						},
 					},
 					"manufacturer": {
 						SchemaProps: spec.SchemaProps{
-							Default: "",
-							Type:    []string{"string"},
-							Format:  "",
+							Description: "Manufacturer represents the device manufacturer",
+							Type:        []string{"string"},
+							Format:      "",
 						},
 					},
 					"model": {
 						SchemaProps: spec.SchemaProps{
-							Default: "",
-							Type:    []string{"string"},
-							Format:  "",
+							Description: "Model represents the device model",
+							Type:        []string{"string"},
+							Format:      "",
 						},
 					},
 					"description": {
 						SchemaProps: spec.SchemaProps{
-							Type:   []string{"string"},
-							Format: "",
+							Description: "Description describe the device ifnromation",
+							Type:        []string{"string"},
+							Format:      "",
 						},
 					},
-					"protocols": {
+					"protocolProperties": {
 						SchemaProps: spec.SchemaProps{
-							Type: []string{"object"},
-							AdditionalProperties: &spec.SchemaOrBool{
-								Allows: true,
-								Schema: &spec.Schema{
-									SchemaProps: spec.SchemaProps{
-										Default: map[string]interface{}{},
-										Ref:     ref("github.com/skeeey/device-addon/pkg/apis/v1alpha1.Values"),
-									},
-								},
-							},
-						},
-					},
-					"properties": {
-						SchemaProps: spec.SchemaProps{
-							Default: map[string]interface{}{},
-							Ref:     ref("github.com/skeeey/device-addon/pkg/apis/v1alpha1.Values"),
+							Description: "ProtocolProperties represents device protocol properties",
+							Default:     map[string]interface{}{},
+							Ref:         ref("github.com/skeeey/device-addon/pkg/apis/v1alpha1.Values"),
 						},
 					},
 					"profile": {
 						SchemaProps: spec.SchemaProps{
-							Default: map[string]interface{}{},
-							Ref:     ref("github.com/skeeey/device-addon/pkg/apis/v1alpha1.DeviceProfile"),
+							Description: "Profile represents the device data profile",
+							Default:     map[string]interface{}{},
+							Ref:         ref("github.com/skeeey/device-addon/pkg/apis/v1alpha1.DeviceProfile"),
 						},
 					},
 				},
-				Required: []string{"name", "driverType", "manufacturer", "model", "protocols", "profile"},
+				Required: []string{"name", "driverType", "profile"},
 			},
 		},
 		Dependencies: []string{
@@ -561,7 +426,8 @@ func schema_device_addon_pkg_apis_v1alpha1_DeviceProfile(ref common.ReferenceCal
 				Properties: map[string]spec.Schema{
 					"deviceResources": {
 						SchemaProps: spec.SchemaProps{
-							Type: []string{"array"},
+							Description: "DeviceResources represents device supporting resources",
+							Type:        []string{"array"},
 							Items: &spec.SchemaOrArray{
 								Schema: &spec.Schema{
 									SchemaProps: spec.SchemaProps{
@@ -572,53 +438,11 @@ func schema_device_addon_pkg_apis_v1alpha1_DeviceProfile(ref common.ReferenceCal
 							},
 						},
 					},
-					"deviceCommands": {
-						SchemaProps: spec.SchemaProps{
-							Type: []string{"array"},
-							Items: &spec.SchemaOrArray{
-								Schema: &spec.Schema{
-									SchemaProps: spec.SchemaProps{
-										Default: map[string]interface{}{},
-										Ref:     ref("github.com/skeeey/device-addon/pkg/apis/v1alpha1.DeviceCommand"),
-									},
-								},
-							},
-						},
-					},
 				},
-				Required: []string{"deviceResources", "deviceCommands"},
 			},
 		},
 		Dependencies: []string{
-			"github.com/skeeey/device-addon/pkg/apis/v1alpha1.DeviceCommand", "github.com/skeeey/device-addon/pkg/apis/v1alpha1.DeviceResource"},
-	}
-}
-
-func schema_device_addon_pkg_apis_v1alpha1_DeviceProfileList(ref common.ReferenceCallback) common.OpenAPIDefinition {
-	return common.OpenAPIDefinition{
-		Schema: spec.Schema{
-			SchemaProps: spec.SchemaProps{
-				Type: []string{"object"},
-				Properties: map[string]spec.Schema{
-					"profiles": {
-						SchemaProps: spec.SchemaProps{
-							Type: []string{"array"},
-							Items: &spec.SchemaOrArray{
-								Schema: &spec.Schema{
-									SchemaProps: spec.SchemaProps{
-										Default: map[string]interface{}{},
-										Ref:     ref("github.com/skeeey/device-addon/pkg/apis/v1alpha1.DeviceProfile"),
-									},
-								},
-							},
-						},
-					},
-				},
-				Required: []string{"profiles"},
-			},
-		},
-		Dependencies: []string{
-			"github.com/skeeey/device-addon/pkg/apis/v1alpha1.DeviceProfile"},
+			"github.com/skeeey/device-addon/pkg/apis/v1alpha1.DeviceResource"},
 	}
 }
 
@@ -630,32 +454,35 @@ func schema_device_addon_pkg_apis_v1alpha1_DeviceResource(ref common.ReferenceCa
 				Properties: map[string]spec.Schema{
 					"name": {
 						SchemaProps: spec.SchemaProps{
-							Default: "",
-							Type:    []string{"string"},
-							Format:  "",
+							Description: "Name represents the device resoruce name",
+							Default:     "",
+							Type:        []string{"string"},
+							Format:      "",
 						},
 					},
 					"description": {
 						SchemaProps: spec.SchemaProps{
-							Default: "",
-							Type:    []string{"string"},
-							Format:  "",
+							Description: "Description represents the device resoruce description",
+							Type:        []string{"string"},
+							Format:      "",
 						},
 					},
 					"properties": {
 						SchemaProps: spec.SchemaProps{
-							Default: map[string]interface{}{},
-							Ref:     ref("github.com/skeeey/device-addon/pkg/apis/v1alpha1.ResourceProperties"),
+							Description: "Name represents the device resoruce properties",
+							Default:     map[string]interface{}{},
+							Ref:         ref("github.com/skeeey/device-addon/pkg/apis/v1alpha1.ResourceProperties"),
 						},
 					},
 					"attributes": {
 						SchemaProps: spec.SchemaProps{
-							Default: map[string]interface{}{},
-							Ref:     ref("github.com/skeeey/device-addon/pkg/apis/v1alpha1.Values"),
+							Description: "Attributes represents the device resoruce attributes",
+							Default:     map[string]interface{}{},
+							Ref:         ref("github.com/skeeey/device-addon/pkg/apis/v1alpha1.Values"),
 						},
 					},
 				},
-				Required: []string{"name", "description", "properties", "attributes"},
+				Required: []string{"name", "properties"},
 			},
 		},
 		Dependencies: []string{
@@ -671,66 +498,57 @@ func schema_device_addon_pkg_apis_v1alpha1_DeviceSpec(ref common.ReferenceCallba
 				Properties: map[string]spec.Schema{
 					"name": {
 						SchemaProps: spec.SchemaProps{
-							Default: "",
-							Type:    []string{"string"},
-							Format:  "",
+							Description: "Name represents the device name",
+							Default:     "",
+							Type:        []string{"string"},
+							Format:      "",
 						},
 					},
 					"driverType": {
 						SchemaProps: spec.SchemaProps{
-							Default: "",
-							Type:    []string{"string"},
-							Format:  "",
+							Description: "DriverType represents the device driver type",
+							Default:     "",
+							Type:        []string{"string"},
+							Format:      "",
 						},
 					},
 					"manufacturer": {
 						SchemaProps: spec.SchemaProps{
-							Default: "",
-							Type:    []string{"string"},
-							Format:  "",
+							Description: "Manufacturer represents the device manufacturer",
+							Type:        []string{"string"},
+							Format:      "",
 						},
 					},
 					"model": {
 						SchemaProps: spec.SchemaProps{
-							Default: "",
-							Type:    []string{"string"},
-							Format:  "",
+							Description: "Model represents the device model",
+							Type:        []string{"string"},
+							Format:      "",
 						},
 					},
 					"description": {
 						SchemaProps: spec.SchemaProps{
-							Type:   []string{"string"},
-							Format: "",
+							Description: "Description describe the device ifnromation",
+							Type:        []string{"string"},
+							Format:      "",
 						},
 					},
-					"protocols": {
+					"protocolProperties": {
 						SchemaProps: spec.SchemaProps{
-							Type: []string{"object"},
-							AdditionalProperties: &spec.SchemaOrBool{
-								Allows: true,
-								Schema: &spec.Schema{
-									SchemaProps: spec.SchemaProps{
-										Default: map[string]interface{}{},
-										Ref:     ref("github.com/skeeey/device-addon/pkg/apis/v1alpha1.Values"),
-									},
-								},
-							},
-						},
-					},
-					"properties": {
-						SchemaProps: spec.SchemaProps{
-							Default: map[string]interface{}{},
-							Ref:     ref("github.com/skeeey/device-addon/pkg/apis/v1alpha1.Values"),
+							Description: "ProtocolProperties represents device protocol properties",
+							Default:     map[string]interface{}{},
+							Ref:         ref("github.com/skeeey/device-addon/pkg/apis/v1alpha1.Values"),
 						},
 					},
 					"profile": {
 						SchemaProps: spec.SchemaProps{
-							Default: map[string]interface{}{},
-							Ref:     ref("github.com/skeeey/device-addon/pkg/apis/v1alpha1.DeviceProfile"),
+							Description: "Profile represents the device data profile",
+							Default:     map[string]interface{}{},
+							Ref:         ref("github.com/skeeey/device-addon/pkg/apis/v1alpha1.DeviceProfile"),
 						},
 					},
 				},
-				Required: []string{"name", "driverType", "manufacturer", "model", "protocols", "profile"},
+				Required: []string{"name", "driverType", "profile"},
 			},
 		},
 		Dependencies: []string{
@@ -772,6 +590,199 @@ func schema_device_addon_pkg_apis_v1alpha1_DeviceStatus(ref common.ReferenceCall
 	}
 }
 
+func schema_device_addon_pkg_apis_v1alpha1_Driver(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "Driver is the schema for the device driver configuration API",
+				Type:        []string{"object"},
+				Properties: map[string]spec.Schema{
+					"kind": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Kind is a string value representing the REST resource this object represents. Servers may infer this from the endpoint the client submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"apiVersion": {
+						SchemaProps: spec.SchemaProps{
+							Description: "APIVersion defines the versioned schema of this representation of an object. Servers should convert recognized schemas to the latest internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"metadata": {
+						SchemaProps: spec.SchemaProps{
+							Default: map[string]interface{}{},
+							Ref:     ref("k8s.io/apimachinery/pkg/apis/meta/v1.ObjectMeta"),
+						},
+					},
+					"spec": {
+						SchemaProps: spec.SchemaProps{
+							Description: "spec holds the configuration about a device driver configuration.",
+							Default:     map[string]interface{}{},
+							Ref:         ref("github.com/skeeey/device-addon/pkg/apis/v1alpha1.DriverSpec"),
+						},
+					},
+					"status": {
+						SchemaProps: spec.SchemaProps{
+							Description: "status holds the state of this configuration.",
+							Default:     map[string]interface{}{},
+							Ref:         ref("github.com/skeeey/device-addon/pkg/apis/v1alpha1.DriverStatus"),
+						},
+					},
+				},
+				Required: []string{"metadata", "spec"},
+			},
+		},
+		Dependencies: []string{
+			"github.com/skeeey/device-addon/pkg/apis/v1alpha1.DriverSpec", "github.com/skeeey/device-addon/pkg/apis/v1alpha1.DriverStatus", "k8s.io/apimachinery/pkg/apis/meta/v1.ObjectMeta"},
+	}
+}
+
+func schema_device_addon_pkg_apis_v1alpha1_DriverConfig(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Type: []string{"object"},
+				Properties: map[string]spec.Schema{
+					"type": {
+						SchemaProps: spec.SchemaProps{
+							Description: "DriverType represents device driver type",
+							Default:     "",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"properties": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Properties represents device driver properties",
+							Default:     map[string]interface{}{},
+							Ref:         ref("github.com/skeeey/device-addon/pkg/apis/v1alpha1.Values"),
+						},
+					},
+				},
+				Required: []string{"type", "properties"},
+			},
+		},
+		Dependencies: []string{
+			"github.com/skeeey/device-addon/pkg/apis/v1alpha1.Values"},
+	}
+}
+
+func schema_device_addon_pkg_apis_v1alpha1_DriverList(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "DriverList is a list of Driver",
+				Type:        []string{"object"},
+				Properties: map[string]spec.Schema{
+					"kind": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Kind is a string value representing the REST resource this object represents. Servers may infer this from the endpoint the client submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"apiVersion": {
+						SchemaProps: spec.SchemaProps{
+							Description: "APIVersion defines the versioned schema of this representation of an object. Servers should convert recognized schemas to the latest internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"metadata": {
+						SchemaProps: spec.SchemaProps{
+							Default: map[string]interface{}{},
+							Ref:     ref("k8s.io/apimachinery/pkg/apis/meta/v1.ListMeta"),
+						},
+					},
+					"items": {
+						SchemaProps: spec.SchemaProps{
+							Type: []string{"array"},
+							Items: &spec.SchemaOrArray{
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Default: map[string]interface{}{},
+										Ref:     ref("github.com/skeeey/device-addon/pkg/apis/v1alpha1.Driver"),
+									},
+								},
+							},
+						},
+					},
+				},
+				Required: []string{"metadata", "items"},
+			},
+		},
+		Dependencies: []string{
+			"github.com/skeeey/device-addon/pkg/apis/v1alpha1.Driver", "k8s.io/apimachinery/pkg/apis/meta/v1.ListMeta"},
+	}
+}
+
+func schema_device_addon_pkg_apis_v1alpha1_DriverSpec(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Type: []string{"object"},
+				Properties: map[string]spec.Schema{
+					"type": {
+						SchemaProps: spec.SchemaProps{
+							Description: "DriverType represents device driver type",
+							Default:     "",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"properties": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Properties represents device driver properties",
+							Default:     map[string]interface{}{},
+							Ref:         ref("github.com/skeeey/device-addon/pkg/apis/v1alpha1.Values"),
+						},
+					},
+				},
+				Required: []string{"type", "properties"},
+			},
+		},
+		Dependencies: []string{
+			"github.com/skeeey/device-addon/pkg/apis/v1alpha1.Values"},
+	}
+}
+
+func schema_device_addon_pkg_apis_v1alpha1_DriverStatus(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Type: []string{"object"},
+				Properties: map[string]spec.Schema{
+					"conditions": {
+						VendorExtensible: spec.VendorExtensible{
+							Extensions: spec.Extensions{
+								"x-kubernetes-patch-merge-key": "type",
+								"x-kubernetes-patch-strategy":  "merge",
+							},
+						},
+						SchemaProps: spec.SchemaProps{
+							Description: "conditions describe the state of the current device driver.",
+							Type:        []string{"array"},
+							Items: &spec.SchemaOrArray{
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Default: map[string]interface{}{},
+										Ref:     ref("k8s.io/apimachinery/pkg/apis/meta/v1.Condition"),
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+		Dependencies: []string{
+			"k8s.io/apimachinery/pkg/apis/meta/v1.Condition"},
+	}
+}
+
 func schema_device_addon_pkg_apis_v1alpha1_MessageBusConfig(ref common.ReferenceCallback) common.OpenAPIDefinition {
 	return common.OpenAPIDefinition{
 		Schema: spec.Schema{
@@ -785,6 +796,13 @@ func schema_device_addon_pkg_apis_v1alpha1_MessageBusConfig(ref common.Reference
 							Format:  "",
 						},
 					},
+					"type": {
+						SchemaProps: spec.SchemaProps{
+							Default: "",
+							Type:    []string{"string"},
+							Format:  "",
+						},
+					},
 					"properties": {
 						SchemaProps: spec.SchemaProps{
 							Default: map[string]interface{}{},
@@ -792,7 +810,7 @@ func schema_device_addon_pkg_apis_v1alpha1_MessageBusConfig(ref common.Reference
 						},
 					},
 				},
-				Required: []string{"enabled", "properties"},
+				Required: []string{"enabled", "type", "properties"},
 			},
 		},
 		Dependencies: []string{
@@ -806,98 +824,108 @@ func schema_device_addon_pkg_apis_v1alpha1_ResourceProperties(ref common.Referen
 			SchemaProps: spec.SchemaProps{
 				Type: []string{"object"},
 				Properties: map[string]spec.Schema{
-					"valueType": {
-						SchemaProps: spec.SchemaProps{
-							Default: "",
-							Type:    []string{"string"},
-							Format:  "",
-						},
-					},
 					"readWrite": {
 						SchemaProps: spec.SchemaProps{
-							Default: "",
-							Type:    []string{"string"},
-							Format:  "",
+							Description: "ReadWrite",
+							Default:     "",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"valueType": {
+						SchemaProps: spec.SchemaProps{
+							Description: "ValueType",
+							Default:     "",
+							Type:        []string{"string"},
+							Format:      "",
 						},
 					},
 					"units": {
 						SchemaProps: spec.SchemaProps{
-							Default: "",
-							Type:    []string{"string"},
-							Format:  "",
-						},
-					},
-					"minimum": {
-						SchemaProps: spec.SchemaProps{
-							Type:   []string{"number"},
-							Format: "double",
-						},
-					},
-					"maximum": {
-						SchemaProps: spec.SchemaProps{
-							Type:   []string{"number"},
-							Format: "double",
+							Description: "Units",
+							Type:        []string{"string"},
+							Format:      "",
 						},
 					},
 					"defaultValue": {
 						SchemaProps: spec.SchemaProps{
-							Default: "",
-							Type:    []string{"string"},
-							Format:  "",
-						},
-					},
-					"mask": {
-						SchemaProps: spec.SchemaProps{
-							Type:   []string{"integer"},
-							Format: "int64",
-						},
-					},
-					"shift": {
-						SchemaProps: spec.SchemaProps{
-							Type:   []string{"integer"},
-							Format: "int64",
-						},
-					},
-					"scale": {
-						SchemaProps: spec.SchemaProps{
-							Type:   []string{"number"},
-							Format: "double",
-						},
-					},
-					"offset": {
-						SchemaProps: spec.SchemaProps{
-							Type:   []string{"number"},
-							Format: "double",
-						},
-					},
-					"base": {
-						SchemaProps: spec.SchemaProps{
-							Type:   []string{"number"},
-							Format: "double",
+							Description: "DefaultValue",
+							Type:        []string{"string"},
+							Format:      "",
 						},
 					},
 					"assertion": {
 						SchemaProps: spec.SchemaProps{
-							Default: "",
-							Type:    []string{"string"},
-							Format:  "",
+							Description: "Minimum",
+							Type:        []string{"string"},
+							Format:      "",
 						},
 					},
 					"mediaType": {
 						SchemaProps: spec.SchemaProps{
-							Default: "",
-							Type:    []string{"string"},
-							Format:  "",
+							Description: "Minimum",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"minimum": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Minimum",
+							Type:        []string{"number"},
+							Format:      "double",
+						},
+					},
+					"maximum": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Maximum",
+							Type:        []string{"number"},
+							Format:      "double",
+						},
+					},
+					"mask": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Mask",
+							Type:        []string{"integer"},
+							Format:      "int64",
+						},
+					},
+					"shift": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Shift",
+							Type:        []string{"integer"},
+							Format:      "int64",
+						},
+					},
+					"scale": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Scale",
+							Type:        []string{"number"},
+							Format:      "double",
+						},
+					},
+					"offset": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Offset",
+							Type:        []string{"number"},
+							Format:      "double",
+						},
+					},
+					"base": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Base",
+							Type:        []string{"number"},
+							Format:      "double",
 						},
 					},
 					"optional": {
 						SchemaProps: spec.SchemaProps{
-							Default: map[string]interface{}{},
-							Ref:     ref("github.com/skeeey/device-addon/pkg/apis/v1alpha1.Values"),
+							Description: "Optional",
+							Default:     map[string]interface{}{},
+							Ref:         ref("github.com/skeeey/device-addon/pkg/apis/v1alpha1.Values"),
 						},
 					},
 				},
-				Required: []string{"valueType", "readWrite", "units", "minimum", "maximum", "defaultValue", "mask", "shift", "scale", "offset", "base", "assertion", "mediaType", "optional"},
+				Required: []string{"readWrite", "valueType"},
 			},
 		},
 		Dependencies: []string{

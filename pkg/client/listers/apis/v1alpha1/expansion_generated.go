@@ -17,3 +17,11 @@ type DeviceAddOnConfigListerExpansion interface{}
 // DeviceAddOnConfigNamespaceListerExpansion allows custom methods to be added to
 // DeviceAddOnConfigNamespaceLister.
 type DeviceAddOnConfigNamespaceListerExpansion interface{}
+
+// DriverListerExpansion allows custom methods to be added to
+// DriverLister.
+type DriverListerExpansion interface{}
+
+// DriverNamespaceListerExpansion allows custom methods to be added to
+// DriverNamespaceLister.
+type DriverNamespaceListerExpansion interface{}

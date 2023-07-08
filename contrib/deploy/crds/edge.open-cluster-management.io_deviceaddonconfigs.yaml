@@ -35,25 +35,23 @@ spec:
           spec:
             description: spec holds the configuration about a device addon.
             properties:
-              drivers:
-                additionalProperties:
-                  type: object
-                type: object
               messageBuses:
-                additionalProperties:
+                items:
                   properties:
                     enabled:
                       type: boolean
                     properties:
                       type: object
+                    type:
+                      type: string
                   type: object
-                type: object
+                type: array
             type: object
           status:
             description: status holds the state of this configuration.
             properties:
               conditions:
-                description: conditions describe the state of the current device.
+                description: conditions describe the state of the current configuration.
                 items:
                   description: "Condition contains details for one aspect of the current
                     state of this API Resource. --- This struct is intended for direct
