@@ -6,8 +6,8 @@ require (
 	github.com/eclipse/paho.mqtt.golang v1.4.2
 	github.com/evanphx/json-patch v4.12.0+incompatible
 	github.com/gopcua/opcua v0.4.0
-	github.com/mochi-co/mqtt/v2 v2.2.14
-	github.com/rs/zerolog v1.28.0
+	github.com/mochi-co/mqtt/v2 v2.2.15
+	github.com/rs/zerolog v1.29.1
 	github.com/spf13/cast v1.4.1
 	github.com/spf13/cobra v1.6.0
 	github.com/spf13/pflag v1.0.5
@@ -35,7 +35,7 @@ require (
 	github.com/cenkalti/backoff/v4 v4.1.3 // indirect
 	github.com/cespare/xxhash/v2 v2.1.2 // indirect
 	github.com/coreos/go-semver v0.3.0 // indirect
-	github.com/coreos/go-systemd/v22 v22.3.3-0.20220203105225-a9a7ef127534 // indirect
+	github.com/coreos/go-systemd/v22 v22.5.0 // indirect
 	github.com/cyphar/filepath-securejoin v0.2.3 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/emicklei/go-restful/v3 v3.9.0 // indirect

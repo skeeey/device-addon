@@ -7,27 +7,31 @@ spec:
   replicas: 1
   selector:
     matchLabels:
-      addon-agent: device-addon-agent
+      open-cluster-management.io/addon: device
   template:
     metadata:
       labels:
-        addon-agent: device-addon-agent
+        open-cluster-management.io/addon: device
     spec:
       serviceAccount: device-addon-agent-sa
       containers:
-        - name: device-addon-agent
-          image: quay.io/skeeey/device-addon:latest
-          imagePullPolicy: Always
-          args:
-          - "/device-addon"
-          - "agent"
-          - --cluster-name={{ .ClusterName }}
-          - --hub-kubeconfig=/etc/hub/kubeconfig
-          volumeMounts:
-            - name: hub-kubeconfig
-              mountPath: /etc/hub/
-              readOnly: true
+      - name: device-addon-agent
+        image: quay.io/skeeey/device-addon:latest
+        imagePullPolicy: IfNotPresent
+        ports:
+          - name: default
+            containerPort: 1883
+            protocol: TCP
+        args:
+        - "/device-addon"
+        - "agent"
+        - --cluster-name={{ .ClusterName }}
+        - --hub-kubeconfig=/etc/hub/kubeconfig
+        volumeMounts:
+          - name: hub-kubeconfig
+            mountPath: /etc/hub/
+            readOnly: true
       volumes:
-        - name: hub-kubeconfig
-          secret:
-            secretName: device-addon-hub-kubeconfig
+      - name: hub-kubeconfig
+        secret:
+          secretName: device-addon-hub-kubeconfig

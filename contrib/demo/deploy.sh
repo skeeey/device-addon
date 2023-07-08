@@ -2,48 +2,36 @@
 
 REPO_DIR="$(cd "$(dirname ${BASH_SOURCE[0]})/../.." ; pwd -P)"
 
-hub="edge-hub"
-spoke="edge-node"
+demo_cluster="edge-demo"
+demo_cluster_context="kind-${demo_cluster}"
+demo_cluster_config=${REPO_DIR}/contrib/demo/kind/config.yaml
+
+addon_namespace="open-cluster-management-agent-addon"
+addon_deploy=${REPO_DIR}/contrib/deploy
+
+opcua_server=${REPO_DIR}/contrib/demo/opcuaserver
 
 rm -rf ${REPO_DIR}/_output
 
-controlplane_path=${REPO_DIR}/_output/multicluster-controlplane
-agent_deploy_path=${controlplane_path}/hack/deploy/agent
-mosquitto_deploy_path=${REPO_DIR}/contrib/mosquitto
-addon_deploy_path=${REPO_DIR}/contrib/deploy
+clusters_path=${REPO_DIR}/_output/clusters
+kubeconfig=${clusters_path}/${demo_cluster}-kind.kubeconfig
 
-hub_kubeconfig=${REPO_DIR}/_output/hub.kubeconfig
+mkdir -p ${clusters_path}
 
-agent_namespace="multicluster-controlplane-agent"
+kind delete clusters ${demo_cluster}
+kind create cluster --name=${demo_cluster} --config ${demo_cluster_config} --kubeconfig ${kubeconfig}
+kind load docker-image quay.io/skeeey/device-addon --name=${demo_cluster}
+kind load docker-image quay.io/skeeey/opcua-server --name=${demo_cluster}
 
-kind delete clusters ${hub} ${spoke}
-kind create cluster --name=${hub}
-kind create cluster --name=${spoke}
+export KUBECONFIG=${kubeconfig}
 
-echo "##### Clone multicluster-controlplane"
-mkdir -p ${REPO_DIR}/_output/multicluster-controlplane
-git clone --depth=1 https://github.com/open-cluster-management-io/multicluster-controlplane.git $REPO_DIR/_output/multicluster-controlplane
+clusteradm init --context=${demo_cluster_context} --wait --feature-gates=AddonManagement=true --output-join-command-file join.sh
+sh -c "$(cat ${REPO_DIR}/join.sh) cluster1 --feature-gates=AddonManagement=true --force-internal-endpoint-lookup --context ${demo_cluster_context}"
+sleep 30
+clusteradm accept --clusters cluster1 --context ${demo_cluster_context}
 
-echo "##### Prepare hub..."
-kubectl --context kind-${hub} config view --minify --flatten > ${hub_kubeconfig}
-export KUBECONFIG=${hub_kubeconfig}
-clusteradm init
+sleep 30
+kubectl apply -k ${addon_deploy}
+kubectl apply -k ${opcua_server}
+
 unset KUBECONFIG
-
-echo "##### Prepare spoke..."
-kubectl --context kind-${hub} config view --minify --flatten > ${agent_deploy_path}/hub-kubeconfig
-kubectl --kubeconfig ${agent_deploy_path}/hub-kubeconfig config set-cluster kind-${hub} --server=https://edge-hub-control-plane:6443
-
-cp -f ${REPO_DIR}/contrib/demo/multicluster-controlplane-agent/deployment.yaml ${agent_deploy_path}/deployment.yaml
-
-kubectl --context kind-${spoke} delete namespace ${agent_namespace} --ignore-not-found
-kubectl --context kind-${spoke} create namespace ${agent_namespace}
-kubectl --context kind-${spoke} -n ${agent_namespace} apply -k ${agent_deploy_path}
-
-sleep 60
-
-kubectl --context kind-${hub} patch managedcluster edge-node -p='{"spec":{"hubAcceptsClient":true}}' --type=merge
-kubectl --context kind-${hub} get csr -l open-cluster-management.io/cluster-name=edge-node | grep Pending | awk '{print $1}' | xargs kubectl certificate approve
-
-echo "##### Prepare addon..."
-kubectl --context kind-${hub} apply -k ${addon_deploy_path}

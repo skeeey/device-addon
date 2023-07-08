@@ -110,7 +110,13 @@ func (m *MQTTMsgBus) ReceiveData(deviceName string, result util.Result) error {
 	data := m.payload(result)
 
 	klog.Infof("Send data to MQTT message bus, [%s] [%s] %s", topic, deviceName, string(data))
-	m.mqttClient.Publish(topic, 0, false, data)
+	token := m.mqttClient.Publish(topic, 0, false, data)
+	if token.Wait() && token.Error() != nil {
+		// TODO handle this error
+		klog.Errorf("failed to send data, %v", token.Error())
+		return nil
+	}
+
 	return nil
 }
 

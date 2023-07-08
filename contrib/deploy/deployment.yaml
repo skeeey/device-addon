@@ -2,22 +2,22 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: device-addon-manager
-  namespace: device-addon
+  namespace: open-cluster-management
 spec:
   replicas: 1
   selector:
     matchLabels:
-      open-cluster-management.io/addon: device-addon
+      open-cluster-management.io/addon: device
   template:
     metadata:
       labels:
-        open-cluster-management.io/addon: device-addon
+        open-cluster-management.io/addon: device
     spec:
       serviceAccount: device-addon-sa
       containers:
         - name: manager
           image: quay.io/skeeey/device-addon:latest
-          imagePullPolicy: Always
+          imagePullPolicy: IfNotPresent
           args:
           - "/device-addon"
           - "manager"

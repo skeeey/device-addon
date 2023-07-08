@@ -9,7 +9,7 @@ spec:
   model: "S1"
   description: "OPCUA device is created for test purpose"
   protocolProperties:
-      endpoint: "opc.tcp://127.0.0.1:53530/OPCUA/SimulationServer"
+      endpoint: "opc.tcp://opcua-server.opcua-server.svc.cluster.local:4840/freeopcua/server/"
   profile:
     deviceResources:
     - name: "counter"
@@ -21,7 +21,7 @@ spec:
         minimum: 0
         maximum: 30
       attributes:
-        nodeId: "ns=3;i=1002"
+        nodeId: "ns=2;i=3"
     - name: "random"
       description: "generated random number"
       properties:
@@ -31,4 +31,4 @@ spec:
         minimum: -2.0
         maximum: 2.0
       attributes:
-        nodeId: "ns=3;i=1003"
+        nodeId: "ns=2;i=2"

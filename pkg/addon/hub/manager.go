@@ -23,7 +23,7 @@ import (
 )
 
 const (
-	installationNamespace = "multicluster-controlplane-agent"
+	installationNamespace = "open-cluster-management-agent-addon"
 	addonName             = "device-addon"
 )
 
@@ -115,6 +115,34 @@ func addonRBAC(kubeConfig *rest.Config) agent.PermissionConfigFunc {
 
 		groups := agent.DefaultGroups(cluster.Name, addon.Name)
 
+		clusterRole := &rbacv1.ClusterRole{
+			ObjectMeta: metav1.ObjectMeta{
+				Name: fmt.Sprintf("open-cluster-management:%s:agent", addon.Name),
+			},
+			Rules: []rbacv1.PolicyRule{
+				{
+					Verbs:     []string{"get", "list", "watch"},
+					Resources: []string{"drivers"},
+					APIGroups: []string{"edge.open-cluster-management.io"},
+				},
+				{
+					Verbs:     []string{"get", "list", "watch"},
+					Resources: []string{"devices"},
+					APIGroups: []string{"edge.open-cluster-management.io"},
+				},
+			},
+		}
+		_, err = kubeclient.RbacV1().ClusterRoles().Get(context.TODO(), clusterRole.Name, metav1.GetOptions{})
+		switch {
+		case errors.IsNotFound(err):
+			_, createErr := kubeclient.RbacV1().ClusterRoles().Create(context.TODO(), clusterRole, metav1.CreateOptions{})
+			if createErr != nil {
+				return createErr
+			}
+		case err != nil:
+			return err
+		}
+
 		role := &rbacv1.Role{
 			ObjectMeta: metav1.ObjectMeta{
 				Name:      fmt.Sprintf("open-cluster-management:%s:agent", addon.Name),
@@ -167,6 +195,30 @@ func addonRBAC(kubeConfig *rest.Config) agent.PermissionConfigFunc {
 		switch {
 		case errors.IsNotFound(err):
 			_, createErr := kubeclient.RbacV1().Roles(cluster.Name).Create(context.TODO(), role, metav1.CreateOptions{})
+			if createErr != nil {
+				return createErr
+			}
+		case err != nil:
+			return err
+		}
+
+		clusterRoleBinding := &rbacv1.ClusterRoleBinding{
+			ObjectMeta: metav1.ObjectMeta{
+				Name: fmt.Sprintf("open-cluster-management:%s:agent", addon.Name),
+			},
+			RoleRef: rbacv1.RoleRef{
+				APIGroup: "rbac.authorization.k8s.io",
+				Kind:     "ClusterRole",
+				Name:     fmt.Sprintf("open-cluster-management:%s:agent", addon.Name),
+			},
+			Subjects: []rbacv1.Subject{
+				{Kind: "Group", APIGroup: "rbac.authorization.k8s.io", Name: groups[0]},
+			},
+		}
+		_, err = kubeclient.RbacV1().ClusterRoleBindings().Get(context.TODO(), clusterRoleBinding.Name, metav1.GetOptions{})
+		switch {
+		case errors.IsNotFound(err):
+			_, createErr := kubeclient.RbacV1().ClusterRoleBindings().Create(context.TODO(), clusterRoleBinding, metav1.CreateOptions{})
 			if createErr != nil {
 				return createErr
 			}

@@ -9,4 +9,4 @@ roleRef:
 subjects:
   - kind: ServiceAccount
     name: device-addon-sa
-    namespace: device-addon
+    namespace: open-cluster-management
