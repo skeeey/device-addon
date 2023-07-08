@@ -1,2 +1,4 @@
 bin
 _output
+*.crt
+*.key
