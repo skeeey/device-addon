@@ -1,6 +1,8 @@
 package drivers
 
 import (
+	"context"
+
 	"github.com/skeeey/device-addon/pkg/apis/v1alpha1"
 	"github.com/skeeey/device-addon/pkg/device/drivers/mqtt"
 	"github.com/skeeey/device-addon/pkg/device/drivers/opcua"
@@ -10,9 +12,9 @@ import (
 )
 
 type Driver interface {
-	Start() error
+	Start(ctx context.Context) error
 
-	Stop()
+	Stop(ctx context.Context)
 
 	AddDevice(device v1alpha1.DeviceConfig) error
 

@@ -24,29 +24,29 @@ type request struct {
 }
 
 type opcuaDevice struct {
-	config     v1alpha1.DeviceConfig
-	requests   []request
-	cancelFunc context.CancelFunc
+	deviceConfig v1alpha1.DeviceConfig
+	requests     []request
+	cancelFunc   context.CancelFunc
 }
 
 type OPCUADriver struct {
 	sync.Mutex
-	serverInfo *OPCUAServerInfo
-	msgBuses   []messagebuses.MessageBus
-	devices    map[string]opcuaDevice
+	config   *Config
+	msgBuses []messagebuses.MessageBus
+	devices  map[string]opcuaDevice
 }
 
 func NewOPCUADriver(driverConfig util.ConfigProperties, msgBuses []messagebuses.MessageBus) *OPCUADriver {
-	var serverInfo = &OPCUAServerInfo{}
-	if err := util.ToConfigObj(driverConfig, serverInfo); err != nil {
+	var config = &Config{}
+	if err := util.ToConfigObj(driverConfig, config); err != nil {
 		klog.Errorf("failed to parse opcua drirver config %v", err)
 		return nil
 	}
 
 	return &OPCUADriver{
-		devices:    make(map[string]opcuaDevice),
-		msgBuses:   msgBuses,
-		serverInfo: serverInfo,
+		devices:  make(map[string]opcuaDevice),
+		msgBuses: msgBuses,
+		config:   config,
 	}
 }
 
@@ -54,12 +54,12 @@ func (d *OPCUADriver) GetType() string {
 	return "opcua"
 }
 
-func (d *OPCUADriver) Start() error {
+func (d *OPCUADriver) Start(ctx context.Context) error {
 	//do nothing
 	return nil
 }
 
-func (d *OPCUADriver) Stop() {
+func (d *OPCUADriver) Stop(ctx context.Context) {
 	d.Lock()
 	defer d.Unlock()
 
@@ -76,7 +76,7 @@ func (d *OPCUADriver) AddDevice(config v1alpha1.DeviceConfig) error {
 
 	last, ok := d.devices[config.Name]
 	if ok {
-		if equality.Semantic.DeepEqual(last.config, config) {
+		if equality.Semantic.DeepEqual(last.deviceConfig, config) {
 			klog.Infof("The device %s already exists", config.Name)
 			return nil
 		}
@@ -99,9 +99,9 @@ func (d *OPCUADriver) AddDevice(config v1alpha1.DeviceConfig) error {
 
 	klog.Infof("The device %s is starting", config.Name)
 	d.devices[config.Name] = opcuaDevice{
-		config:     config,
-		requests:   requests,
-		cancelFunc: cancel,
+		deviceConfig: config,
+		requests:     requests,
+		cancelFunc:   cancel,
 	}
 	return nil
 }
@@ -139,18 +139,18 @@ func (d *OPCUADriver) startSubscription(ctx context.Context, config v1alpha1.Dev
 	}
 	ep := opcua.SelectEndpoint(
 		endpoints,
-		d.serverInfo.SecurityPolicy,
-		ua.MessageSecurityModeFromString(d.serverInfo.SecurityMode),
+		d.config.SecurityPolicy,
+		ua.MessageSecurityModeFromString(d.config.SecurityMode),
 	)
 	if ep == nil {
 		return fmt.Errorf("failed to find suitable endpoint")
 	}
 
 	opts := []opcua.Option{
-		opcua.SecurityPolicy(d.serverInfo.SecurityPolicy),
-		opcua.SecurityModeString(d.serverInfo.SecurityMode),
-		opcua.CertificateFile(d.serverInfo.CertFile),
-		opcua.PrivateKeyFile(d.serverInfo.KeyFile),
+		opcua.SecurityPolicy(d.config.SecurityPolicy),
+		opcua.SecurityModeString(d.config.SecurityMode),
+		opcua.CertificateFile(d.config.CertFile),
+		opcua.PrivateKeyFile(d.config.KeyFile),
 		opcua.AuthAnonymous(),
 		opcua.SecurityFromEndpoint(ep, ua.UserTokenTypeAnonymous),
 	}

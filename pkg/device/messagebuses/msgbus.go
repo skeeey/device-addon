@@ -1,17 +1,19 @@
 package messagebuses
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/skeeey/device-addon/pkg/apis/v1alpha1"
 	"github.com/skeeey/device-addon/pkg/device/messagebuses/mqtt"
 	"github.com/skeeey/device-addon/pkg/device/util"
+
 	"k8s.io/klog/v2"
 )
 
 type MessageBus interface {
-	Start() error
-	Stop()
+	Start(ctx context.Context) error
+	Stop(ctx context.Context)
 	ReceiveData(deviceName string, result util.Result) error
 	SendData() error
 }

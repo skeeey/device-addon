@@ -1,11 +1,12 @@
 package mqtt
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"time"
 
-	paho "github.com/eclipse/paho.mqtt.golang"
+	"github.com/eclipse/paho.golang/paho"
 	mochi "github.com/mochi-co/mqtt/v2"
 	"github.com/mochi-co/mqtt/v2/hooks/auth"
 	"github.com/mochi-co/mqtt/v2/listeners"
@@ -14,6 +15,7 @@ import (
 	"k8s.io/klog/v2"
 
 	"github.com/skeeey/device-addon/pkg/apis/v1alpha1"
+	"github.com/skeeey/device-addon/pkg/device/client"
 	"github.com/skeeey/device-addon/pkg/device/util"
 )
 
@@ -31,18 +33,12 @@ type palyloadFunc func(util.Result) []byte
 
 type MQTTMsgBus struct {
 	mqttBroker *mochi.Server
-	mqttClient paho.Client
+	pubClient  *paho.Client
 	pubTopic   string
 	payload    palyloadFunc
 }
 
 func NewMQTTMsgBus(config v1alpha1.MessageBusConfig) *MQTTMsgBus {
-	opts := paho.NewClientOptions()
-	opts.AddBroker("tcp://127.0.0.1:1883")
-	opts.SetClientID("msgbus-mqtt-client")
-	opts.SetKeepAlive(time.Second * time.Duration(3600))
-	opts.SetAutoReconnect(true)
-
 	server := mochi.New(nil)
 	l := server.Log.Level(zerolog.ErrorLevel)
 	server.Log = &l
@@ -64,7 +60,6 @@ func NewMQTTMsgBus(config v1alpha1.MessageBusConfig) *MQTTMsgBus {
 
 	m := &MQTTMsgBus{
 		mqttBroker: server,
-		mqttClient: paho.NewClient(opts),
 		pubTopic:   fmt.Sprintf("%s", ptopic),
 	}
 
@@ -79,7 +74,7 @@ func NewMQTTMsgBus(config v1alpha1.MessageBusConfig) *MQTTMsgBus {
 	return m
 }
 
-func (m *MQTTMsgBus) Start() error {
+func (m *MQTTMsgBus) Start(ctx context.Context) error {
 	go func() {
 		tcp := listeners.NewTCP("mqttmsgbus", ":1883", nil)
 		if err := m.mqttBroker.AddListener(tcp); err != nil {
@@ -96,10 +91,20 @@ func (m *MQTTMsgBus) Start() error {
 	// TODO need a notify mechanism
 	time.Sleep(5 * time.Second)
 
-	token := m.mqttClient.Connect()
-	if token.Wait() && token.Error() != nil {
-		return token.Error()
+	client, err := client.ConnectToMQTTBroker(
+		ctx,
+		&client.MQTTBrokerInfo{
+			Host:      "127.0.0.1:1883",
+			ClientId:  "msgbus-mqtt-pub-client",
+			KeepAlive: 3600,
+		},
+		nil,
+	)
+	if err != nil {
+		return err
 	}
+
+	m.pubClient = client
 
 	klog.Infof("Connect to localhost MQTT message bus")
 	return nil
@@ -110,10 +115,14 @@ func (m *MQTTMsgBus) ReceiveData(deviceName string, result util.Result) error {
 	data := m.payload(result)
 
 	klog.Infof("Send data to MQTT message bus, [%s] [%s] %s", topic, deviceName, string(data))
-	token := m.mqttClient.Publish(topic, 0, false, data)
-	if token.Wait() && token.Error() != nil {
+	_, err := m.pubClient.Publish(context.TODO(), &paho.Publish{
+		Topic:   topic,
+		QoS:     0,
+		Payload: data,
+	})
+	if err != nil {
 		// TODO handle this error
-		klog.Errorf("failed to send data, %v", token.Error())
+		klog.Errorf("failed to send data, %v", err)
 		return nil
 	}
 
@@ -125,8 +134,8 @@ func (m *MQTTMsgBus) SendData() error {
 	return nil
 }
 
-func (m *MQTTMsgBus) Stop() {
-	m.mqttClient.Disconnect(1000)
+func (m *MQTTMsgBus) Stop(ctx context.Context) {
+	m.pubClient.Disconnect(&paho.Disconnect{ReasonCode: 0})
 	m.mqttBroker.Close()
 }
 

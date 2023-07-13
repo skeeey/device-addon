@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# https://thingsboard.cloud/home
+# https://demo.thingsboard.io/
 # host.docker.internal
 
 docker run -it -v ~/.tb-gateway/logs:/thingsboard_gateway/logs \

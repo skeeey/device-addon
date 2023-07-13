@@ -5,8 +5,7 @@ metadata:
 spec:
   name: "opcua-s001"
   driverType: "opcua"
-  manufacturer: "Prosys"
-  model: "S1"
+  manufacturer: "Free OPC-UA"
   description: "OPCUA device is created for test purpose"
   protocolProperties:
       endpoint: "opc.tcp://opcua-server.opcua-server.svc.cluster.local:4840/freeopcua/server/"

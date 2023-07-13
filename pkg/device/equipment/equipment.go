@@ -1,6 +1,7 @@
 package equipment
 
 import (
+	"context"
 	"fmt"
 	"sync"
 
@@ -29,7 +30,7 @@ func NewEquipment() *Equipment {
 	}
 }
 
-func (e *Equipment) Start(configs []v1alpha1.MessageBusConfig) error {
+func (e *Equipment) Start(ctx context.Context, configs []v1alpha1.MessageBusConfig) error {
 	e.Lock()
 	defer e.Unlock()
 
@@ -43,8 +44,8 @@ func (e *Equipment) Start(configs []v1alpha1.MessageBusConfig) error {
 			return err
 		}
 
-		if err := newMsgBus.Start(); err != nil {
-			return fmt.Errorf("failed to start message bus %s", c.MessageBusType)
+		if err := newMsgBus.Start(ctx); err != nil {
+			return fmt.Errorf("failed to start message bus %s, %v", c.MessageBusType, err)
 		}
 
 		e.messageBuses[c.MessageBusType] = newMsgBus
@@ -58,11 +59,11 @@ func (e *Equipment) Stop(configs []v1alpha1.MessageBusConfig) {
 	defer e.Unlock()
 
 	for _, d := range e.drivers {
-		d.driver.Stop()
+		d.driver.Stop(context.TODO())
 	}
 
 	for _, m := range e.messageBuses {
-		m.Stop()
+		m.Stop(context.TODO())
 	}
 }
 
@@ -87,10 +88,10 @@ func (e *Equipment) InstallDriver(config v1alpha1.DriverConfig) error {
 		}
 
 		klog.Infof("Reinstall the driver %s already exists", config.DriverType)
-		d.Stop()
+		d.Stop(context.TODO())
 	}
 
-	if err := d.Start(); err != nil {
+	if err := d.Start(context.TODO()); err != nil {
 		return fmt.Errorf("failed to start driver %s", config.DriverType)
 	}
 
@@ -112,7 +113,7 @@ func (e *Equipment) UnInstallDriver(config v1alpha1.DriverConfig) error {
 		return nil
 	}
 
-	d.driver.Stop()
+	d.driver.Stop(context.TODO())
 	delete(e.drivers, config.DriverType)
 	return nil
 }

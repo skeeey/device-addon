@@ -6,6 +6,8 @@ demo_cluster="edge-demo"
 demo_cluster_context="kind-${demo_cluster}"
 demo_cluster_config=${REPO_DIR}/contrib/demo/kind/config.yaml
 
+spoke_cluster_name="edge"
+
 addon_namespace="open-cluster-management-agent-addon"
 addon_deploy=${REPO_DIR}/contrib/deploy
 
@@ -26,9 +28,9 @@ kind load docker-image quay.io/skeeey/opcua-server --name=${demo_cluster}
 export KUBECONFIG=${kubeconfig}
 
 clusteradm init --context=${demo_cluster_context} --wait --feature-gates=AddonManagement=true --output-join-command-file join.sh
-sh -c "$(cat ${REPO_DIR}/join.sh) cluster1 --feature-gates=AddonManagement=true --force-internal-endpoint-lookup --context ${demo_cluster_context}"
+sh -c "$(cat ${REPO_DIR}/join.sh) ${spoke_cluster_name} --feature-gates=AddonManagement=true --force-internal-endpoint-lookup --context ${demo_cluster_context}"
 sleep 30
-clusteradm accept --clusters cluster1 --context ${demo_cluster_context}
+clusteradm accept --clusters ${spoke_cluster_name} --context ${demo_cluster_context}
 
 sleep 30
 kubectl apply -k ${addon_deploy}

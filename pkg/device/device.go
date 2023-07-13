@@ -61,7 +61,7 @@ func (o *DriverAgentOptions) RunDriverAgent(ctx context.Context) error {
 
 	e := equipment.NewEquipment()
 
-	if err := e.Start(config.MessageBuses); err != nil {
+	if err := e.Start(ctx, config.MessageBuses); err != nil {
 		return err
 	}
 

@@ -3,7 +3,7 @@ module github.com/skeeey/device-addon
 go 1.20
 
 require (
-	github.com/eclipse/paho.mqtt.golang v1.4.2
+	github.com/eclipse/paho.golang v0.11.0
 	github.com/evanphx/json-patch v4.12.0+incompatible
 	github.com/gopcua/opcua v0.4.0
 	github.com/mochi-co/mqtt/v2 v2.2.15

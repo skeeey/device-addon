@@ -1,15 +1,9 @@
 package mqtt
 
-type MQTTBrokerInfo struct {
-	Host      string `json:"host"`
-	ClientId  string `json:"clientId"`
-	Qos       int    `json:"qos"`
-	KeepAlive int    `json:"keepAlive"`
+import "github.com/skeeey/device-addon/pkg/device/client"
 
-	ConnEstablishingRetry int `json:"connEstablishingRetry"`
-
-	AuthMode      string `json:"authMode"`
-	CredentialDir string `json:"credentialDir"`
+type Config struct {
+	client.MQTTBrokerInfo `json:"inline"`
 
 	SubTopic string `json:"subTopic"`
 	PubTopic string `json:"pubTopic"`

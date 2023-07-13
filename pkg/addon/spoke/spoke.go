@@ -53,18 +53,20 @@ func (o *AgentOptions) RunAgent(ctx context.Context, kubeconfig *rest.Config) er
 	}
 
 	equipment := equipment.NewEquipment()
-	if err := equipment.Start([]v1alpha1.MessageBusConfig{
-		{
-			MessageBusType: "mqtt",
-			Enabled:        true,
-			Properties: v1alpha1.Values{
-				Data: map[string]interface{}{
-					"receiveTopic":  o.ReceiveTopic,
-					"payloadFormat": o.PayloadFormat,
+	if err := equipment.Start(
+		ctx,
+		[]v1alpha1.MessageBusConfig{
+			{
+				MessageBusType: "mqtt",
+				Enabled:        true,
+				Properties: v1alpha1.Values{
+					Data: map[string]interface{}{
+						"receiveTopic":  o.ReceiveTopic,
+						"payloadFormat": o.PayloadFormat,
+					},
 				},
 			},
-		},
-	}); err != nil {
+		}); err != nil {
 		return err
 	}
 
