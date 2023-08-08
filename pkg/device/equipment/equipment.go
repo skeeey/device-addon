@@ -54,7 +54,7 @@ func (e *Equipment) Start(ctx context.Context, configs []v1alpha1.MessageBusConf
 	return nil
 }
 
-func (e *Equipment) Stop(configs []v1alpha1.MessageBusConfig) {
+func (e *Equipment) Stop() {
 	e.Lock()
 	defer e.Unlock()
 

@@ -63,7 +63,7 @@ type DeviceConfig struct {
 	// +optional
 	Model string `yaml:"model,omitempty" json:"model,omitempty"`
 
-	// Description describe the device ifnromation
+	// Description describe the device information
 	// +optional
 	Description string `yaml:"description,omitempty" json:"description,omitempty"`
 
@@ -143,19 +143,19 @@ type ResourceProperties struct {
 }
 
 type DeviceResource struct {
-	// Name represents the device resoruce name
+	// Name represents the device resource name
 	// +required
 	Name string `yaml:"name" json:"name"`
 
-	// Description represents the device resoruce description
+	// Description represents the device resource description
 	// +optional
 	Description string `yaml:"description,omitempty" json:"description,omitempty"`
 
-	// Name represents the device resoruce properties
+	// Name represents the device resource properties
 	// +required
 	Properties ResourceProperties `yaml:"properties" json:"properties"`
 
-	// Attributes represents the device resoruce attributes
+	// Attributes represents the device resource attributes
 	// +optional
 	// +kubebuilder:validation:XPreserveUnknownFields
 	Attributes Values `yaml:"attributes,omitempty" json:"attributes,omitempty"`

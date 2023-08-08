@@ -22,6 +22,6 @@ comment "enable a opcua device on the edge cluster"
 pe "kubectl -n ${cluster} apply -f ${demo_dir}/resources/opcua/device.yaml"
 pe "kubectl -n ${cluster} get devices opcua-s001 -oyaml"
 
-comment "we can get the data of device opcua-s001 with MQTT topic devices/+/data/+ on tcp://127.0.0.1:1883"
+comment "You can get the data of device opcua-s001 with MQTT topic devices/+/data/+ on tcp://127.0.0.1:1883"
 
 unset KUBECONFIG

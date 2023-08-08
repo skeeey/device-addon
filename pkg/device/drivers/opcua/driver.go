@@ -39,7 +39,7 @@ type OPCUADriver struct {
 func NewOPCUADriver(driverConfig util.ConfigProperties, msgBuses []messagebuses.MessageBus) *OPCUADriver {
 	var config = &Config{}
 	if err := util.ToConfigObj(driverConfig, config); err != nil {
-		klog.Errorf("failed to parse opcua drirver config %v", err)
+		klog.Errorf("failed to parse opcua driver config %v", err)
 		return nil
 	}
 

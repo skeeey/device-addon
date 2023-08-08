@@ -32,7 +32,7 @@ type devicesController struct {
 	patcher     patcher.Patcher[*v1alpha1.Device, v1alpha1.DeviceSpec, v1alpha1.DeviceStatus]
 }
 
-func NewDevicesConroller(
+func NewDevicesController(
 	clusterName string,
 	client deviceclient.Interface,
 	deviceInformer deviceinformerv1alpha1.DeviceInformer,

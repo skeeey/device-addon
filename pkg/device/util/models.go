@@ -36,7 +36,7 @@ type Attributes map[string]any
 type Command struct {
 	// refer to DeviceProfile.DeviceCommand.Name
 	DeviceCommand string     `yaml:"DeviceCommand"`
-	Attributes    Attributes `yaml:"atrributes"`
+	Attributes    Attributes `yaml:"attributes"`
 }
 
 type Result struct {

@@ -42,7 +42,7 @@ func (o *DriverAgentOptions) AddFlags(flags *pflag.FlagSet) {
 }
 
 // RunAgent starts the controllers on agent to process work from hub.
-// TODO wach the configuration files changes with "github.com/fsnotify/fsnotify"
+// TODO watch the configuration files changes with "github.com/fsnotify/fsnotify"
 func (o *DriverAgentOptions) RunDriverAgent(ctx context.Context) error {
 	config := &messageBusList{}
 	if err := util.LoadConfig(path.Join(o.ConfigDir, configFileName), config); err != nil {

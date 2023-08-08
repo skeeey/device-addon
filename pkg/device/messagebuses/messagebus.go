@@ -18,16 +18,16 @@ type MessageBus interface {
 	SendData() error
 }
 
-func Get(conifg v1alpha1.MessageBusConfig) (MessageBus, error) {
-	switch conifg.MessageBusType {
+func Get(config v1alpha1.MessageBusConfig) (MessageBus, error) {
+	switch config.MessageBusType {
 	case "mqtt":
-		if conifg.Enabled {
-			return mqtt.NewMQTTMsgBus(conifg), nil
+		if config.Enabled {
+			return mqtt.NewMQTTMsgBus(config), nil
 		}
 	default:
-		return nil, fmt.Errorf("unsupported message bus type %s", conifg.MessageBusType)
+		return nil, fmt.Errorf("unsupported message bus type %s", config.MessageBusType)
 	}
 
-	klog.Warningf("Thers is no message bus is found")
+	klog.Warningf("There is no message bus is found")
 	return nil, nil
 }

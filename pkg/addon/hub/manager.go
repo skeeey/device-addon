@@ -3,21 +3,25 @@ package hub
 import (
 	"context"
 	"embed"
+	"encoding/json"
 	"fmt"
 
+	"github.com/skeeey/device-addon/pkg/apis/v1alpha1"
 	rbacv1 "k8s.io/api/rbac/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/runtime/schema"
 	utilrand "k8s.io/apimachinery/pkg/util/rand"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
 	"k8s.io/klog/v2"
 
+	deviceaddonclientset "github.com/skeeey/device-addon/pkg/client/clientset/versioned"
 	"open-cluster-management.io/addon-framework/pkg/addonfactory"
 	"open-cluster-management.io/addon-framework/pkg/addonmanager"
 	"open-cluster-management.io/addon-framework/pkg/agent"
 	"open-cluster-management.io/addon-framework/pkg/utils"
-	addonapiv1alpha1 "open-cluster-management.io/api/addon/v1alpha1"
+	addonv1alpha1 "open-cluster-management.io/api/addon/v1alpha1"
 	clusterv1 "open-cluster-management.io/api/cluster/v1"
 	workv1 "open-cluster-management.io/api/work/v1"
 )
@@ -31,6 +35,11 @@ const (
 var fs embed.FS
 
 func Run(ctx context.Context, kubeConfig *rest.Config) error {
+	addonClient, err := deviceaddonclientset.NewForConfig(kubeConfig)
+	if err != nil {
+		return err
+	}
+
 	mgr, err := addonmanager.New(kubeConfig)
 	if err != nil {
 		return err
@@ -46,6 +55,14 @@ func Run(ctx context.Context, kubeConfig *rest.Config) error {
 		}).
 		WithInstallStrategy(agent.InstallAllStrategy(installationNamespace)).
 		WithAgentHealthProber(agentHealthProber()).
+		WithConfigGVRs(
+			schema.GroupVersionResource{
+				Group:    v1alpha1.GroupVersion.Group,
+				Version:  v1alpha1.GroupVersion.Version,
+				Resource: "deviceaddonconfigs",
+			},
+		).
+		WithGetValuesFuncs(getAddOnConfigFunc(ctx, addonClient)).
 		BuildTemplateAgentAddon()
 	if err != nil {
 		klog.Errorf("failed to build agent %v", err)
@@ -98,7 +115,7 @@ func agentHealthProber() *agent.HealthProber {
 						return nil
 					}
 
-					return fmt.Errorf("readyReplica is %d for deployement %s/%s", *value.Value.Integer, identifier.Namespace, identifier.Name)
+					return fmt.Errorf("readyReplica is %d for deployment %s/%s", *value.Value.Integer, identifier.Namespace, identifier.Name)
 				}
 				return fmt.Errorf("readyReplica is not probed")
 			},
@@ -107,8 +124,8 @@ func agentHealthProber() *agent.HealthProber {
 }
 
 func addonRBAC(kubeConfig *rest.Config) agent.PermissionConfigFunc {
-	return func(cluster *clusterv1.ManagedCluster, addon *addonapiv1alpha1.ManagedClusterAddOn) error {
-		kubeclient, err := kubernetes.NewForConfig(kubeConfig)
+	return func(cluster *clusterv1.ManagedCluster, addon *addonv1alpha1.ManagedClusterAddOn) error {
+		kubeClient, err := kubernetes.NewForConfig(kubeConfig)
 		if err != nil {
 			return err
 		}
@@ -132,10 +149,10 @@ func addonRBAC(kubeConfig *rest.Config) agent.PermissionConfigFunc {
 				},
 			},
 		}
-		_, err = kubeclient.RbacV1().ClusterRoles().Get(context.TODO(), clusterRole.Name, metav1.GetOptions{})
+		_, err = kubeClient.RbacV1().ClusterRoles().Get(context.TODO(), clusterRole.Name, metav1.GetOptions{})
 		switch {
 		case errors.IsNotFound(err):
-			_, createErr := kubeclient.RbacV1().ClusterRoles().Create(context.TODO(), clusterRole, metav1.CreateOptions{})
+			_, createErr := kubeClient.RbacV1().ClusterRoles().Create(context.TODO(), clusterRole, metav1.CreateOptions{})
 			if createErr != nil {
 				return createErr
 			}
@@ -191,10 +208,10 @@ func addonRBAC(kubeConfig *rest.Config) agent.PermissionConfigFunc {
 				},
 			},
 		}
-		_, err = kubeclient.RbacV1().Roles(cluster.Name).Get(context.TODO(), role.Name, metav1.GetOptions{})
+		_, err = kubeClient.RbacV1().Roles(cluster.Name).Get(context.TODO(), role.Name, metav1.GetOptions{})
 		switch {
 		case errors.IsNotFound(err):
-			_, createErr := kubeclient.RbacV1().Roles(cluster.Name).Create(context.TODO(), role, metav1.CreateOptions{})
+			_, createErr := kubeClient.RbacV1().Roles(cluster.Name).Create(context.TODO(), role, metav1.CreateOptions{})
 			if createErr != nil {
 				return createErr
 			}
@@ -215,10 +232,10 @@ func addonRBAC(kubeConfig *rest.Config) agent.PermissionConfigFunc {
 				{Kind: "Group", APIGroup: "rbac.authorization.k8s.io", Name: groups[0]},
 			},
 		}
-		_, err = kubeclient.RbacV1().ClusterRoleBindings().Get(context.TODO(), clusterRoleBinding.Name, metav1.GetOptions{})
+		_, err = kubeClient.RbacV1().ClusterRoleBindings().Get(context.TODO(), clusterRoleBinding.Name, metav1.GetOptions{})
 		switch {
 		case errors.IsNotFound(err):
-			_, createErr := kubeclient.RbacV1().ClusterRoleBindings().Create(context.TODO(), clusterRoleBinding, metav1.CreateOptions{})
+			_, createErr := kubeClient.RbacV1().ClusterRoleBindings().Create(context.TODO(), clusterRoleBinding, metav1.CreateOptions{})
 			if createErr != nil {
 				return createErr
 			}
@@ -241,10 +258,10 @@ func addonRBAC(kubeConfig *rest.Config) agent.PermissionConfigFunc {
 			},
 		}
 
-		_, err = kubeclient.RbacV1().RoleBindings(cluster.Name).Get(context.TODO(), binding.Name, metav1.GetOptions{})
+		_, err = kubeClient.RbacV1().RoleBindings(cluster.Name).Get(context.TODO(), binding.Name, metav1.GetOptions{})
 		switch {
 		case errors.IsNotFound(err):
-			_, createErr := kubeclient.RbacV1().RoleBindings(cluster.Name).Create(context.TODO(), binding, metav1.CreateOptions{})
+			_, createErr := kubeClient.RbacV1().RoleBindings(cluster.Name).Create(context.TODO(), binding, metav1.CreateOptions{})
 			if createErr != nil {
 				return createErr
 			}
@@ -253,5 +270,24 @@ func addonRBAC(kubeConfig *rest.Config) agent.PermissionConfigFunc {
 		}
 
 		return nil
+	}
+}
+
+func getAddOnConfigFunc(ctx context.Context, addonClient deviceaddonclientset.Interface) addonfactory.GetValuesFunc {
+	return func(cluster *clusterv1.ManagedCluster, addon *addonv1alpha1.ManagedClusterAddOn) (addonfactory.Values, error) {
+		config, err := addonClient.EdgeV1alpha1().DeviceAddOnConfigs(cluster.Name).Get(ctx, addonName, metav1.GetOptions{})
+		if errors.IsNotFound(err) {
+			return map[string]interface{}{}, nil
+		}
+		if err != nil {
+			return nil, err
+		}
+
+		data, err := json.Marshal(config.Spec)
+		if err != nil {
+			return nil, err
+		}
+
+		return map[string]interface{}{"AddOnConfigData": string(data)}, nil
 	}
 }

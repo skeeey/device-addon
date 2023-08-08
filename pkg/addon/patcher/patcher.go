@@ -16,7 +16,7 @@ import (
 )
 
 // Patcher is just the Patch API with a generic to keep use sites type safe.
-// This is inspired by the commiter code in https://github.com/kcp-dev/kcp/blob/main/pkg/reconciler/committer/committer.go
+// This is inspired by the committer code in https://github.com/kcp-dev/kcp/blob/main/pkg/reconciler/committer/committer.go
 type PatchClient[R runtime.Object] interface {
 	Patch(ctx context.Context, name string, pt types.PatchType, data []byte, opts metav1.PatchOptions, subresources ...string) (R, error)
 }

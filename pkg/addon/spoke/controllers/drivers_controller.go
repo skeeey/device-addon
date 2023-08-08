@@ -30,7 +30,7 @@ type driversController struct {
 	patcher     patcher.Patcher[*v1alpha1.Driver, v1alpha1.DriverSpec, v1alpha1.DriverStatus]
 }
 
-func NewDriversConroller(
+func NewDriversController(
 	clusterName string,
 	client deviceclient.Interface,
 	driverInformer deviceinformerv1alpha1.DriverInformer,

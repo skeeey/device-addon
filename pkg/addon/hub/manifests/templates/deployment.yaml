@@ -27,11 +27,24 @@ spec:
         - "agent"
         - --cluster-name={{ .ClusterName }}
         - --hub-kubeconfig=/etc/hub/kubeconfig
+        {{ if .AddOnConfigData }}
+        - --addonconfig=/etc/agent/config
+        {{ end }}
         volumeMounts:
           - name: hub-kubeconfig
             mountPath: /etc/hub/
             readOnly: true
+          {{ if .AddOnConfigData }}
+          - name: addon-config
+            mountPath: /etc/agent/
+            readOnly: true
+          {{ end }}
       volumes:
       - name: hub-kubeconfig
         secret:
           secretName: device-addon-hub-kubeconfig
+      {{ if .AddOnConfigData }}
+      - name: addon-config
+        configMap:
+          name: device-addon-config
+      {{ end }}

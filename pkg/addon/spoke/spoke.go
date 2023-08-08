@@ -11,75 +11,71 @@ import (
 
 	"github.com/skeeey/device-addon/pkg/addon/spoke/controllers"
 	"github.com/skeeey/device-addon/pkg/apis/v1alpha1"
-	deviceclient "github.com/skeeey/device-addon/pkg/client/clientset/versioned"
-	deviceinformers "github.com/skeeey/device-addon/pkg/client/informers/externalversions"
+	deviceaddonclientset "github.com/skeeey/device-addon/pkg/client/clientset/versioned"
+	deviceaddoninformers "github.com/skeeey/device-addon/pkg/client/informers/externalversions"
 	"github.com/skeeey/device-addon/pkg/device/equipment"
+	"github.com/skeeey/device-addon/pkg/device/util"
+)
+
+const (
+	defaultDataTopic     = "devices/+/data/+"
+	defaultPayloadFormat = "jsonMap"
 )
 
 // AgentOptions defines the flags for workload agent
 type AgentOptions struct {
-	HubKubeconfigFile string
 	SpokeClusterName  string
-	// TODO read these from addon configuration api
-	ReceiveTopic  string
-	PayloadFormat string
+	HubKubeConfigFile string
+	AddOnConfigFile   string
+}
+
+type messageBusList struct {
+	MessageBuses []v1alpha1.MessageBusConfig `yaml:"messageBuses" json:"messageBuses"`
 }
 
 // NewAgentOptions returns the flags with default value set
 func NewAgentOptions() *AgentOptions {
-	return &AgentOptions{
-		ReceiveTopic:  "devices/%s/data/%s",
-		PayloadFormat: "jsonMap",
-	}
+	return &AgentOptions{}
 }
 
 func (o *AgentOptions) AddFlags(flags *pflag.FlagSet) {
-	flags.StringVar(&o.HubKubeconfigFile, "hub-kubeconfig", o.HubKubeconfigFile, "Location of kubeconfig file to connect to hub cluster.")
 	flags.StringVar(&o.SpokeClusterName, "cluster-name", o.SpokeClusterName, "Name of spoke cluster.")
-	flags.StringVar(&o.ReceiveTopic, "messagebus-receive-topic", o.ReceiveTopic, "")
-	flags.StringVar(&o.PayloadFormat, "messagebus-payload-format", o.PayloadFormat, "")
+	flags.StringVar(&o.HubKubeConfigFile, "hub-kubeconfig", o.HubKubeConfigFile, "Location of kubeconfig file to connect to hub cluster.")
+	flags.StringVar(&o.AddOnConfigFile, "addonconfig", o.AddOnConfigFile, "Location of add-on config file.")
 }
 
 // RunAgent starts the controllers on agent to process work from hub.
 func (o *AgentOptions) RunAgent(ctx context.Context, kubeconfig *rest.Config) error {
-	hubRestConfig, err := clientcmd.BuildConfigFromFlags("", o.HubKubeconfigFile)
+	hubRestConfig, err := clientcmd.BuildConfigFromFlags("", o.HubKubeConfigFile)
 	if err != nil {
 		return err
 	}
 
-	deviceClient, err := deviceclient.NewForConfig(hubRestConfig)
+	deviceClient, err := deviceaddonclientset.NewForConfig(hubRestConfig)
+	if err != nil {
+		return err
+	}
+
+	config, err := o.LoadAddOnConfig()
 	if err != nil {
 		return err
 	}
 
 	equipment := equipment.NewEquipment()
-	if err := equipment.Start(
-		ctx,
-		[]v1alpha1.MessageBusConfig{
-			{
-				MessageBusType: "mqtt",
-				Enabled:        true,
-				Properties: v1alpha1.Values{
-					Data: map[string]interface{}{
-						"receiveTopic":  o.ReceiveTopic,
-						"payloadFormat": o.PayloadFormat,
-					},
-				},
-			},
-		}); err != nil {
+	if err := equipment.Start(ctx, config); err != nil {
 		return err
 	}
 
-	deviceinformerFactory := deviceinformers.NewSharedInformerFactory(deviceClient, 10*time.Minute)
+	deviceinformerFactory := deviceaddoninformers.NewSharedInformerFactory(deviceClient, 10*time.Minute)
 
-	driverController := controllers.NewDriversConroller(
+	driverController := controllers.NewDriversController(
 		o.SpokeClusterName,
 		deviceClient,
 		deviceinformerFactory.Edge().V1alpha1().Drivers(),
 		equipment,
 	)
 
-	deviceController := controllers.NewDevicesConroller(
+	deviceController := controllers.NewDevicesController(
 		o.SpokeClusterName,
 		deviceClient,
 		deviceinformerFactory.Edge().V1alpha1().Devices(),
@@ -94,4 +90,28 @@ func (o *AgentOptions) RunAgent(ctx context.Context, kubeconfig *rest.Config) er
 	<-ctx.Done()
 
 	return nil
+}
+
+func (o *AgentOptions) LoadAddOnConfig() ([]v1alpha1.MessageBusConfig, error) {
+	if len(o.AddOnConfigFile) != 0 {
+		config := &messageBusList{}
+		if err := util.LoadConfig(o.AddOnConfigFile, config); err != nil {
+			return nil, err
+		}
+
+		return config.MessageBuses, nil
+	}
+
+	return []v1alpha1.MessageBusConfig{
+		{
+			MessageBusType: "mqtt",
+			Enabled:        true,
+			Properties: v1alpha1.Values{
+				Data: map[string]interface{}{
+					"dataTopic":     defaultDataTopic,
+					"payloadFormat": defaultPayloadFormat,
+				},
+			},
+		},
+	}, nil
 }
