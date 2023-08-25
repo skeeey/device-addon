@@ -1,5 +1,7 @@
 # device-addon
 
+Move to https://github.com/open-cluster-management-io/addon-contrib/tree/main/device-addon
+
 The device-addon integrates devices connected to IoT application layer.
 
 ## Features
